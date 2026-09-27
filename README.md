@@ -18,13 +18,13 @@
 
 > **Перехідний стан (G-X, 24.09.2026).** Сайт поки лежить у **корені** (`index.html` · `data/` · `media/`) — GitHub Pages публікує `/`.
 > Переїзд у `docs/` — лише після того, як Konst перемкне джерело публікації (GitHub Pages → `/docs` · Cloudflare → `docs`).
-> **Хід 2-б, коміт А (G-Y, 25.09.2026):** `lens/` · `archive/` — копія з `lens-governance` (md5 ≡). **До коміту Б правити лише в ядрі** (`products/EquipLens/`, так оголошує `Lens_INDEX` §5): Б прибирає ядрову копію й перемикає оголошення сюди — після того, як гейти ядра читатимуть продукт через `--repo` (хід 7 журналу).
-> Живі самері (S34 · S35), стенд і смоук `v17_30`, wordmark, K0 · K21 ×2 · S17 — поки лише в Project, чекають транспорту.
+> **Хід 2-б завершено (G-Z, 27.09.2026):** канон, самері, стенди й архів EquipLens живуть **лише тут** — ядро `lens-governance` їх більше не тримає, Project — теж.
+> Що живе — оголошує `lens/EquipLens_INDEX.md`; гейт продукту: `python3 <lens-governance>/kernel/Lens_validate.py --product .`
 
 ## Як почати сесію
 
 ```bash
 curl -sO https://raw.githubusercontent.com/Konst-Andre/lens-governance/main/kernel/Lens_start.py
-GH_TOKEN=… python3 Lens_start.py --product EquipLens --summary-of EquipLens
+python3 Lens_start.py --product EquipLens --summary-of EquipLens
 ```
 Далі — порядок читання з `lens-governance:kernel/Lens_INDEX.md` §1: черга `lens/EquipLens_CHERGA.md` цілком → живе самері з `sessions/` (§0 «ВІДКРИТЕ») → `Work_Standard.md` точково.

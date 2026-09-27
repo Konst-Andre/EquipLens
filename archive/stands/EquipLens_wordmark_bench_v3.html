@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EquipLens · вітрина вордмарка v3</title>
+<!--
+  живе доки: не обрано фінальний шрифт вордмарка (К28).
+  Дім: Project поруч із живим стендом. Оголошення в Lens_INDEX §5 — борг S32 §0 п.5.
+
+  ЩО ЦЕ. Вітрина v2 судила шрифт на плоскому прямокутнику. v3 судить його
+  в ШАПЦІ: аврора · плитка знака · знак Н5 з градієнтним лотком · вордмарк
+  із градієнтним «Equip» · капсула кнопок праворуч. Змінюється РІВНО одне —
+  сімейство шрифта. Усе інше 1:1 з LOCK_SEED стенда EquipLens_headbench_v17_26.
+
+  ЧОМУ ШАПКА, А НЕ ПРЯМОКУТНИК. Капсула має backdrop-filter blur(14) sat(190%).
+  backdrop-filter не робить НІЧОГО над плоским фоном — він розмиває те, що під
+  ним. Перенести числа матеріалу без аврори означало б показати ті самі цифри
+  й інший результат.
+
+  ЗВІДКИ ЧИСЛА. LOCK_SEED (device-verified), headbench v17_26, рядки 1748–1775.
+  Свідоме відступлення одне й оголошене: канва/поверхня темної теми взяті
+  ЛІТЕРАЛАМИ з [data-theme="dark"], а чорнило й кінці градієнта — ОБЧИСЛЕНІ
+  з важелів ґрунту (dkH/dkI/valL/mutL, aH/aS/aL), бо в стенді літерали темної
+  теми — заглушки, а бойові пише JS (В-2). Чорнило судиться, канва — ні.
+
+  ДЕТЕКТОР. Замір ширини на канві проти ДВОХ фолбеків. document.fonts.check()
+  не вживається: він повертає true для неіснуючої родини (дефект v1, S32 §6).
+  Ряд __NOFONT_CANARY__ — канарка: мусить давати ✗ ЗАВЖДИ. Показала ✓ —
+  зламаний детектор, а не знайдений шрифт (wsd 1.15, прогін у обидва боки).
+
+  ДОСТАВКА. Кожна родина окремим <link>: неіснуючий слаг дає 404 сам собі
+  й не валить каталог. Array Wide НЕ підключений навмисно — якщо Array
+  сподобається, ширини дивимось окремим раундом, а не шумом у вітрині.
+  ⚠ Відкривати в Safari або з GitHub Pages. Пісочниця асистента ріже
+  api.fontshare.com своїм CSP і дасть 0/3 (wsd 2.14, прецедент S32).
+-->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=chillax@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=array@400,500,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+button{background:none;border:none;font:inherit;color:inherit;cursor:pointer}
+
+/* ---------- харнес: власні токени, НЕ токени продукту ---------- */
+:root{
+  --bg:#0E0E12; --card:#17171E; --rim:rgba(255,255,255,.10);
+  --hi:#F0F0F5; --hi2:#A3A3AB; --hi3:#71717A;
+  --ok:#3BC98B; --bad:#FF6B6B;
+}
+body{
+  background:var(--bg); color:var(--hi);
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  padding:10px 10px calc(14px + env(safe-area-inset-bottom,0px));
+  min-height:100dvh;
+}
+
+/* ---------- пульт ---------- */
+.pult{background:var(--card);border:1px solid var(--rim);border-radius:14px;padding:11px;margin-bottom:12px}
+.hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.hd h1{font-size:14px;font-weight:800;letter-spacing:-.2px}
+.hd .sp{flex:1}
+.btn{height:30px;padding:0 11px;border-radius:9px;background:#22222C;border:1px solid var(--rim);font-size:12px;font-weight:600}
+.lv{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.lv label{width:78px;flex:none;font-size:11px;color:var(--hi2);line-height:1.25}
+.lv input[type=range]{flex:1;min-width:0;accent-color:#FF5C93;height:22px}
+.lv .val{width:52px;flex:none;text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--hi2)}
+.pairs{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.pb{height:28px;padding:0 10px;border-radius:8px;background:#1E1E27;border:1px solid var(--rim);font-size:11px;font-weight:600;color:var(--hi2)}
+.pb[aria-pressed="true"]{background:#33333F;color:var(--hi);border-color:rgba(255,255,255,.22)}
+
+/* ---------- ряд = картка харнеса ---------- */
+.row{background:var(--card);border:1px solid var(--rim);border-radius:14px;padding:10px;margin-bottom:10px}
+.meta{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.meta .name{font-size:12px;font-weight:700;color:var(--hi2)}
+.meta .sp{flex:1}
+.chk{font-family:ui-monospace,Menlo,monospace;font-size:10px;padding:3px 7px;border-radius:7px;
+  border:1px solid var(--rim);color:var(--hi3);white-space:nowrap}
+.chk[data-s="ok"]{color:var(--ok);border-color:rgba(59,201,139,.35)}
+.chk[data-s="no"]{color:var(--bad);border-color:rgba(255,107,107,.35)}
+.note{margin-top:8px;font-size:10px;color:var(--hi3);line-height:1.45}
+
+/* =====================================================================
+   ЗОНА ПОРТУ · нижче — розмітка й токени 1:1 з headbench v17_26.
+   Правити тільки разом зі стендом.
+   ===================================================================== */
+.screenbox{
+  border-radius:16px; overflow:hidden; position:relative;
+  background-color:var(--canvas); background-image:var(--bg-aur,none);
+}
+.screenbox[data-theme="light"]{
+  --canvas:#EFEFF3; --surface:#FFFFFF;
+  --ink:#131318; --ink-2:#54545F; --ink-3:#8A8A96;
+  --line:rgba(18,18,28,.085);
+  /* g1/g2 · aHL:340 aSL:100 aLL:46 · gShift +40 → 20° */
+  --g1:hsl(340 100% 46%); --g2:hsl(20 100% 46%);
+}
+.screenbox[data-theme="dark"]{
+  --canvas:#08080B; --surface:#17171E;
+  /* обчислені з ґрунту: dkH:250 dkI:6 valL:90 mutL:74 */
+  --ink:hsl(250 6% 90%); --ink-2:hsl(250 4.8% 74%); --ink-3:hsl(250 4.2% 55%);
+  --line:rgba(255,255,255,.075);
+  /* aH:340 aS:100 aL:50 */
+  --g1:hsl(340 100% 50%); --g2:hsl(20 100% 50%);
+}
+
+/* appbar · headbench р.274 */
+.el-appbar{display:flex;align-items:center;gap:8px;padding:12px 14px 14px;min-height:42px}
+.el-brand{display:flex;align-items:center;gap:var(--mgap,2px);min-width:0;flex:none}
+.el-brand .el-mk{flex:none;width:var(--msize,28px);height:var(--msize,28px);color:var(--ink);display:block}
+.el-brand .el-mk svg{width:100%;height:100%;stroke-width:var(--msw,1.2);fill:none;stroke:currentColor;
+  stroke-linecap:round;stroke-linejoin:round}
+.el-mk .el-tray[data-p="grad"]{stroke:url(#elGrad)}
+
+/* К27 · плитка знака — власного матеріалу НЕ має, споживає --hp-* капсули */
+.el-btile{flex:none;display:flex;align-items:center;justify-content:center;
+  width:var(--bq-sz,34px);height:var(--bq-sz,34px);border-radius:var(--bq-r,11px);
+  background:var(--hp-bg);border:1px solid var(--hp-rim);box-shadow:var(--hp-sh);
+  background-clip:padding-box;
+  backdrop-filter:blur(var(--hp-blur)) saturate(var(--hp-sat));
+  -webkit-backdrop-filter:blur(var(--hp-blur)) saturate(var(--hp-sat));
+}
+
+/* вордмарк · headbench р.290–301 */
+.el-wm{font-size:var(--wsize,21px);letter-spacing:var(--wtrack,-1px);white-space:nowrap;line-height:1.15}
+.el-wm .a{font-weight:var(--weq,800)}
+.el-wm .b{font-weight:var(--wle,600);color:var(--wm-b,var(--ink-3))}
+.el-wm.eq-grad .a{background:linear-gradient(var(--gang,100deg),var(--g1),var(--g2));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.el-spacer{flex:1;min-width:0}
+
+/* капсула кнопок · hgrp='glass' */
+.el-hgrp{flex:none;display:flex;align-items:center;gap:var(--hb-gap,4px);
+  padding:var(--hp-px,7px);border-radius:calc(var(--br,18px) + var(--hp-px,7px));
+  background:var(--hp-bg);border:1px solid var(--hp-rim);box-shadow:var(--hp-sh);
+  background-clip:padding-box;
+  backdrop-filter:blur(var(--hp-blur)) saturate(var(--hp-sat));
+  -webkit-backdrop-filter:blur(var(--hp-blur)) saturate(var(--hp-sat));
+}
+.el-hbtn{flex:none;height:var(--bh,30px);min-width:var(--bh,30px);border-radius:var(--br,18px);
+  display:flex;align-items:center;justify-content:center;color:var(--hbInk,var(--ink-2))}
+.el-hbtn svg{width:var(--hbSz,18px);height:var(--hbSz,18px);fill:none;stroke:currentColor;
+  stroke-width:var(--hbSw,1.8);stroke-linecap:round;stroke-linejoin:round}
+/* ===================== кінець зони порту ===================== */
+
+.foot{font-size:10px;color:var(--hi3);line-height:1.5}
+#diag{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:9.5px;line-height:1.5;
+  color:var(--hi3);background:var(--card);border:1px solid var(--rim);border-radius:10px;padding:8px;margin:8px 0 0;overflow-x:auto}
+#out{width:100%;margin-top:8px;background:var(--card);color:var(--hi2);border:1px solid var(--rim);
+  border-radius:10px;padding:8px;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;
+  min-height:64px;resize:vertical}
+@media (orientation:landscape) and (max-width:900px){
+  body::before{content:"Поверни телефон вертикально";position:fixed;inset:0;z-index:99;
+    background:var(--bg);color:var(--hi);display:grid;place-items:center;font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<div class="pult">
+  <div class="hd">
+    <h1>Вітрина вордмарка · v3</h1>
+    <div class="sp"></div>
+    <button class="btn" id="th">тема</button>
+    <button class="btn" id="cp">копія</button>
+  </div>
+
+  <div class="lv">
+    <label>кегель</label>
+    <input type="range" id="sz" min="16" max="28" step="1" value="21">
+    <div class="val" id="szv">21</div>
+  </div>
+  <div class="lv">
+    <label>плитка</label>
+    <input type="range" id="tl" min="26" max="44" step="1" value="34">
+    <div class="val" id="tlv">34</div>
+  </div>
+  <div class="lv">
+    <label>чорнило «Lens»</label>
+    <input type="range" id="ik" min="0" max="100" step="5" value="60">
+    <div class="val" id="ikv">60%</div>
+  </div>
+  <div class="lv">
+    <label>трекінг</label>
+    <input type="range" id="tr" min="-25" max="10" step="1" value="-10">
+    <div class="val" id="trv">-1.0px</div>
+  </div>
+  <div class="pairs" id="pairs"></div>
+</div>
+
+<div id="rows"></div>
+
+<div class="foot">
+  <div><b>Що судиться.</b> Змінюється рівно одне — сімейство шрифта. Аврора, плитка,
+  знак Н5, градієнт «Equip», капсула кнопок і всі відступи взяті з <code>LOCK_SEED</code>
+  стенда <code>v17_26</code> без правок.</div>
+  <div style="margin-top:6px"><b>Позначка ✓/✗.</b> Міряє не красу, а <b>чи шрифт приїхав</b>:
+  ширина тестового рядка проти двох фолбеків. Ряд <code>__NOFONT_CANARY__</code> —
+  канарка детектора, він мусить бути ✗ завжди. Канарка ✓ = зламаний детектор.</div>
+  <div style="margin-top:6px"><b>Пара ваг.</b> В <code>Array</code> немає 800/900 — у нього
+  <b>власна</b> пара 700/400, це позначено в бейджі. Під чужою парою браузер синтезує
+  жирність, і ти оцінював би підробку.</div>
+  <div style="margin-top:6px">⚠ Відкривати в <b>Safari</b> або з <b>GitHub&nbsp;Pages</b>.
+  Вбудований переглядач ріже <code>api.fontshare.com</code>.</div>
+  <pre id="diag"></pre>
+  <textarea id="out" readonly placeholder="копія — зняти стан"></textarea>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ── каталог: 6 фіналістів + канарка ─────────────────────────────── */
+var FONTS = [
+  {n:'Cabinet Grotesk', f:"'Cabinet Grotesk'", src:'F', tag:'фаворит асистента · вигнута нога R, зрізані термінали'},
+  {n:'Clash Display',   f:"'Clash Display'",   src:'F', tag:'гострий дисплей, широка постава'},
+  {n:'Chillax',         f:"'Chillax'",         src:'F', tag:'заокруглений геометричний'},
+  {n:'Manrope',         f:"'Manrope'",         src:'G', tag:'КОНТРОЛЬ · зараз у білді'},
+  {n:'JetBrains Mono',  f:"'JetBrains Mono'",  src:'G', tag:'кандидат оператора · моно, кожна літера в рівному квадраті'},
+  {n:'Array',           f:"'Array'",           src:'F', tag:'точкова сітка · три ваги, 800/900 немає', p:3},
+  {n:'__NOFONT_CANARY__', f:"'__NOFONT_CANARY__'", src:'—', tag:'КАНАРКА · мусить бути ✗ завжди (wsd 1.15)'}
+];
+
+var PAIRS = [[800,600],[700,500],[900,700],[700,400]];
+
+/* ── LOCK_SEED · headbench v17_26, шапка ─────────────────────────── */
+var L = {
+  /* вордмарк */ wSize:21, wEq:800, wLe:600, wTrack:-10, wLeInkL:60, wLeInkD:60,
+  /* градієнт */ gAng:100,
+  /* знак      */ mSize:28, mSw:1.2, mGap:2, pRad:2.2,
+  n5Cut:4.3, n5Gap:2.2, n5Tray:3.2, n5TrayW:1.2, n5Lines:3, n5w:[50,80,100],
+  /* плитка    */ bqSz:34, bqR:11,
+  /* капсула   */ hpPx:7, hpBlur:14, hpSat:190, hpToneL:8, hpToneD:5,
+  hpRimL:11, hpRimD:16, hpRidgeL:28, hpRidgeD:28, hpElev:1, hpShA:18, hpShY:1,
+  /* кнопки    */ bH:30, bR:18, hbSz:18, hbSw:1.8, hbGap:4, hbInkL:55, hbInkD:65,
+  /* аврора    */ bgSpread:115, bgTiltL:3, bgTiltD:1,
+  bgHL:[216,232,196], bgHD:[212,276,194],
+  bgAL:[32,38,30],    bgAD:[28,14,8],
+  bgLtL:60, bgLtD:55, bgSatL:36, bgSatD:64
+};
+var AUR_ALL = [[20,40,90,80,55],[80,65,85,75,50],[50,20,95,85,50]];
+
+var S = {sz:L.wSize, tl:L.bqSz, ik:L.wLeInkL, tr:L.wTrack, pair:0, dark:true};
+
+var rowsEl  = document.getElementById('rows');
+var pairsEl = document.getElementById('pairs');
+var diagEl  = document.getElementById('diag');
+var outEl   = document.getElementById('out');
+
+function hsla(h,s,l,a){ return 'hsl('+h+' '+s+'% '+l+'%'+(a==null?'':' / '+a)+')'; }
+
+/* ── аврора · порт aurLayers() ───────────────────────────────────── */
+function aur(dark){
+  var hu = dark ? L.bgHD : L.bgHL, al = dark ? L.bgAD : L.bgAL;
+  var lt = dark ? L.bgLtD : L.bgLtL, sa = dark ? L.bgSatD : L.bgSatL;
+  var sp = L.bgSpread/100;
+  var out = AUR_ALL.map(function(p,i){
+    return 'radial-gradient(ellipse '+Math.round(p[2]*sp)+'% '+Math.round(p[3]*sp)+'% '
+      + 'at '+p[0]+'% '+p[1]+'%, '
+      + hsla(hu[i], sa, lt, (al[i]/100).toFixed(3))+' 0, transparent '+p[4]+'%)';
+  });
+  var t = (dark ? L.bgTiltD : L.bgTiltL)/100;
+  if (t > 0) out.push('linear-gradient(170deg,rgba(255,255,255,'+t.toFixed(3)+') 0%,rgba(255,255,255,0) 60%)');
+  return out.join(',');
+}
+
+/* ── знак Н5 · порт MARKS.n5() ───────────────────────────────────── */
+function n5(){
+  var xl=5.6, xr=18.4, T=3.0, r=L.pRad;
+  var bot=21.0, trayTop=bot-L.n5Tray, Bcut=trayTop-L.n5Gap;
+  var cut=L.n5Cut, tw=L.n5TrayW, tr=2.4;
+  var doc = '<path d="M'+xl+' '+Bcut.toFixed(2)+'V'+(T+r).toFixed(2)
+    + 'Q'+xl+' '+T+' '+(xl+r).toFixed(2)+' '+T
+    + 'H'+(xr-cut).toFixed(2)+'L'+xr+' '+(T+cut).toFixed(2)
+    + 'V'+Bcut.toFixed(2)+'"/>';
+  var fold = '<path d="M'+(xr-cut).toFixed(2)+' '+T+'v'+cut.toFixed(2)+'h'+cut.toFixed(2)+'"/>';
+  var lines='', lx0=xl+2.8, lx1=xr-2.8, top=8.6, gap=3.2;
+  for (var i=0;i<L.n5Lines;i++){
+    var w = (lx1-lx0)*L.n5w[i]/100;
+    lines += '<path d="M'+lx0.toFixed(2)+' '+(top+gap*i).toFixed(2)+'h'+w.toFixed(2)+'"/>';
+  }
+  var X1=xl-tw, X2=xr+tw;
+  var tray = '<path class="el-tray" data-p="grad" d="M'+X1.toFixed(2)+' '+trayTop.toFixed(2)
+    + 'V'+(bot-tr).toFixed(2)+'Q'+X1.toFixed(2)+' '+bot+' '+(X1+tr).toFixed(2)+' '+bot
+    + 'H'+(X2-tr).toFixed(2)+'Q'+X2.toFixed(2)+' '+bot+' '+X2.toFixed(2)+' '+(bot-tr).toFixed(2)
+    + 'V'+trayTop.toFixed(2)+'"/>';
+  var defs = '<defs><linearGradient id="elGrad" x1="0" y1="0" x2="1" y2="1">'
+    + '<stop stop-color="var(--g1)"/><stop offset="1" stop-color="var(--g2)"/></linearGradient></defs>';
+  return '<svg viewBox="0 0 24 24">'+defs+doc+fold+lines+tray+'</svg>';
+}
+var I_SRCH = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>';
+var I_KEB  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>';
+
+/* ── ДЕТЕКТОР · замір, а не питання ──────────────────────────────── */
+var _cv = null;
+function ctx(){
+  if (_cv === null){
+    var c = document.createElement('canvas');
+    _cv = (c && c.getContext) ? c.getContext('2d') : false;
+  }
+  return _cv;
+}
+function arrived(fam, w){
+  var c = ctx();
+  if (!c) return null;                       /* jsdom → «?», не вигаданий ✓ */
+  var t = 'EquipLens 0123456789';
+  function m(f){ c.font = w+' 48px '+f; return c.measureText(t).width; }
+  var b1 = m('monospace'), b2 = m('serif');
+  var x1 = m('"'+fam+'", monospace'), x2 = m('"'+fam+'", serif');
+  return (Math.abs(x1-b1) > 0.5) || (Math.abs(x2-b2) > 0.5);
+}
+
+/* ── збірка ──────────────────────────────────────────────────────── */
+function build(){
+  rowsEl.innerHTML = FONTS.map(function(o,i){
+    return '<div class="row" data-i="'+i+'">'
+      + '<div class="meta">'
+        + '<div class="name">'+o.n+'</div><div class="sp"></div>'
+        + '<div class="chk" data-chk="'+i+'">…</div>'
+      + '</div>'
+      + '<div class="screenbox" data-box="'+i+'">'
+        + '<div class="el-appbar">'
+          + '<div class="el-brand">'
+            + '<span class="el-btile"><span class="el-mk">'+n5()+'</span></span>'
+            + '<span class="el-wm eq-grad" data-wm="'+i+'"><span class="a">Equip</span><span class="b">Lens</span></span>'
+          + '</div>'
+          + '<div class="el-spacer"></div>'
+          + '<div class="el-hgrp">'
+            + '<button class="el-hbtn">'+I_SRCH+'</button>'
+            + '<button class="el-hbtn">'+I_KEB+'</button>'
+          + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="note">'+o.tag+'</div>'
+    + '</div>';
+  }).join('');
+
+  pairsEl.innerHTML = PAIRS.map(function(p,i){
+    return '<button class="pb" data-p="'+i+'" aria-pressed="'+(i===0)+'">'+p[0]+' / '+p[1]+'</button>';
+  }).join('');
+}
+
+function apply(){
+  var dark = S.dark;
+  var pair = PAIRS[S.pair];
+  var ink  = S.ik;
+  var wmB  = ink >= 100 ? 'var(--ink)' : ink <= 0 ? 'var(--ink-3)'
+           : 'color-mix(in srgb, var(--ink) '+ink+'%, var(--ink-3))';
+  var hbI  = dark ? L.hbInkD : L.hbInkL;
+  var hbInk= 'color-mix(in srgb, var(--ink) '+hbI+'%, var(--ink-3))';
+
+  /* матеріал --hp-* · порт applyVars() */
+  var hpT  = dark ? L.hpToneD : L.hpToneL;
+  var hpBg = hpT >= 0 ? 'rgba(255,255,255,'+(hpT/100).toFixed(3)+')'
+                      : 'rgba(0,0,0,'+(-hpT/100).toFixed(3)+')';
+  var hpRim= dark ? 'rgba(255,255,255,'+(L.hpRimD/100).toFixed(2)+')'
+                  : 'rgba(20,20,30,'+(L.hpRimL/200).toFixed(3)+')';
+  var ridge= dark ? L.hpRidgeD : L.hpRidgeL;
+  var parts= [];
+  if (ridge > 0) parts.push('inset 0 1px 0 rgba(255,255,255,'+(ridge/100).toFixed(2)+')');
+  if (!dark && L.hpElev > 0 && L.hpShA > 0)
+    parts.push('0 '+L.hpShY+'px '+L.hpElev+'px rgba(16,16,24,'+(L.hpShA/100).toFixed(2)+')');
+  var hpSh = parts.join(',') || 'none';
+
+  var aurCss = aur(dark);
+
+  FONTS.forEach(function(o,i){
+    var box = rowsEl.querySelector('[data-box="'+i+'"]');
+    var wm  = rowsEl.querySelector('[data-wm="'+i+'"]');
+    if (!box || !wm) return;
+    var p = (o.p != null) ? PAIRS[o.p] : pair;
+
+    box.setAttribute('data-theme', dark ? 'dark' : 'light');
+    var bs = box.style;
+    bs.setProperty('--bg-aur', aurCss);
+    bs.setProperty('--hp-bg', hpBg);
+    bs.setProperty('--hp-rim', hpRim);
+    bs.setProperty('--hp-sh', hpSh);
+    bs.setProperty('--hp-blur', L.hpBlur+'px');
+    bs.setProperty('--hp-sat', L.hpSat+'%');
+    bs.setProperty('--hp-px', L.hpPx+'px');
+    bs.setProperty('--bq-sz', S.tl+'px');
+    bs.setProperty('--bq-r', L.bqR+'px');
+    bs.setProperty('--msize', L.mSize+'px');
+    bs.setProperty('--msw', L.mSw);
+    bs.setProperty('--mgap', L.mGap+'px');
+    bs.setProperty('--bh', L.bH+'px');
+    bs.setProperty('--br', L.bR+'px');
+    bs.setProperty('--hb-gap', L.hbGap+'px');
+    bs.setProperty('--hbSz', L.hbSz+'px');
+    bs.setProperty('--hbSw', L.hbSw);
+    bs.setProperty('--hbInk', hbInk);
+    bs.setProperty('--gang', L.gAng+'deg');
+    bs.setProperty('--wsize', S.sz+'px');
+    bs.setProperty('--wtrack', (S.tr/10).toFixed(1)+'px');
+    bs.setProperty('--weq', p[0]);
+    bs.setProperty('--wle', p[1]);
+    bs.setProperty('--wm-b', wmB);
+
+    /* єдине, що змінюється між рядами */
+    wm.style.fontFamily = o.f + ", 'Manrope', system-ui, sans-serif";
+  });
+
+  check();
+}
+
+function check(){
+  var lines = [];
+  FONTS.forEach(function(o,i){
+    var el = rowsEl.querySelector('[data-chk="'+i+'"]');
+    if (!el) return;
+    var p = (o.p != null) ? PAIRS[o.p] : PAIRS[S.pair];
+    var fam = o.f.replace(/'/g,'');
+    var a = arrived(fam, p[0]), b = arrived(fam, p[1]);
+    var own = (o.p != null) ? '⌂' : '';
+    if (a === null){
+      el.textContent = o.src+' ? '+p[0]+' ? '+p[1]+own;
+      el.removeAttribute('data-s');
+      lines.push(o.n+': ? (канви немає)');
+    } else {
+      el.textContent = o.src+' '+(a?'✓':'✗')+p[0]+' '+(b?'✓':'✗')+p[1]+own;
+      el.setAttribute('data-s', (a||b) ? 'ok' : 'no');
+      lines.push(o.n+': '+((a||b)?'приїхав':'НЕ приїхав'));
+    }
+  });
+
+  /* канарка · другий бік прогону (wsd 1.15) */
+  var can = FONTS.length - 1;
+  var cv = arrived(FONTS[can].f.replace(/'/g,''), 800);
+  var verdict = cv === null ? '? канви немає — детектор не судився'
+              : cv ? '✗✗ ДЕТЕКТОР ЗЛАМАНИЙ: канарка показала ✓'
+                   : '✓ детектор справний: канарка ✗, як мусить';
+  diagEl.textContent = 'КАНАРКА · ' + verdict + '\n'
+    + 'тема: ' + (S.dark ? 'темна' : 'світла')
+    + ' · пара: ' + PAIRS[S.pair].join('/')
+    + ' · кегель ' + S.sz + ' · плитка ' + S.tl
+    + ' · чорнило ' + S.ik + '% · трекінг ' + (S.tr/10).toFixed(1) + 'px\n'
+    + lines.join('\n');
+}
+
+/* ── важелі ──────────────────────────────────────────────────────── */
+function lever(id, key, fmt){
+  var el = document.getElementById(id), out = document.getElementById(id+'v');
+  if (!el) return;
+  el.value = S[key];
+  if (out) out.textContent = fmt(S[key]);
+  el.addEventListener('input', function(){
+    S[key] = +el.value;
+    if (out) out.textContent = fmt(S[key]);
+    apply();
+  });
+}
+
+build();
+lever('sz','sz', function(v){ return String(v); });
+lever('tl','tl', function(v){ return String(v); });
+lever('ik','ik', function(v){ return v+'%'; });
+lever('tr','tr', function(v){ return (v/10).toFixed(1)+'px'; });
+
+pairsEl.addEventListener('click', function(e){
+  var b = e.target.closest('[data-p]');
+  if (!b) return;
+  S.pair = +b.getAttribute('data-p');
+  Array.prototype.forEach.call(pairsEl.children, function(x,i){
+    x.setAttribute('aria-pressed', String(i === S.pair));
+  });
+  apply();
+});
+
+document.getElementById('th').addEventListener('click', function(){
+  S.dark = !S.dark;
+  document.getElementById('ik').value = S.ik;
+  apply();
+});
+
+document.getElementById('cp').addEventListener('click', function(){
+  var txt = 'EquipLens · вітрина вордмарка v3\n' + diagEl.textContent + '\n\n'
+    + 'S = {sz:'+S.sz+', tl:'+S.tl+', ik:'+S.ik+', tr:'+S.tr+', pair:'+S.pair+'}';
+  outEl.value = txt;
+  if (navigator.clipboard) navigator.clipboard.writeText(txt);
+  outEl.select && outEl.select();
+});
+
+apply();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
+setTimeout(check, 1200);
+setTimeout(check, 3000);
+})();
+</script>
+</body>
+</html>
