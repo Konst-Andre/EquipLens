@@ -18,10 +18,10 @@
 
 | файл | що |
 |---|---|
-| `sessions/EquipLens_session_summary_S35_OSTRIVETS.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху) |
-| `sessions/EquipLens_session_summary_S34_AURORA_HYBRID.md` | попереднє |
+| `sessions/EquipLens_session_summary_S36_CC_ADOPT.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): адаптація під Claude Code |
+| `sessions/EquipLens_session_summary_S35_OSTRIVETS.md` | попереднє (останнє по стенду) |
 
-Витіснені — `archive/summaries/` (S1…S33).
+Витіснені — `archive/summaries/` (S1…S34).
 
 ## Канон
 

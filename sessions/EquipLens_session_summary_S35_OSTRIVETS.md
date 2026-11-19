@@ -1,5 +1,5 @@
 > живе доки: до наступного самері EquipLens (тоді → archive/)
-> **Дім:** Project, поруч із живим стендом. Черга живе окремо — `EquipLens_CHERGA.md`.
+> **Дім:** `sessions/` (до G-Z — Project). Черга живе окремо — `EquipLens_CHERGA.md`.
 
 # EquipLens · S35 — острівець на важелях · 244 вироки запечені
 
