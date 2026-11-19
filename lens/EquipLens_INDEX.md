@@ -12,7 +12,15 @@
 
 | файл | роль |
 |---|---|
-| `lens/EquipLens_CHERGA.md` | відкрите по продукту, читається цілком на старті. Стеля — `Lens_INDEX §5` ядра (8 192 B) |
+| `lens/EquipLens_CHERGA.md` | відкрите по продукту, читається цілком на старті. Стеля — `Lens_INDEX §5` ядра (12 пунктів, 30 днів) |
+
+## Брифи (пункти черги на 2+ сесії)
+
+| файл | що |
+|---|---|
+| `lens/EquipLens_STAND-1_brief.md` | бриф `STAND-1`: стенд до білда |
+| `lens/EquipLens_BUILD-1_brief.md` | бриф `BUILD-1`: порт стенда в PWA |
+| `lens/EquipLens_HOST-1_brief.md` | бриф `HOST-1`: Pages → Cloudflare Workers |
 
 ## Живі самері (стеля 2)
 
