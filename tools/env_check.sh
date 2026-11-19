@@ -22,6 +22,7 @@ echo "база: HEAD $(git rev-parse --short HEAD) · origin/main $(git rev-pars
 g=$(code https://api.github.com/)
 vars=""; for v in GH_TOKEN $EXTRA_VARS; do [ -n "${!v:-}" ] && vars+="$v=так " || vars+="$v=ні "; done
 gate=$(bash -c "$GATE_CMD" 2>&1 | tail -1)
+case "$gate" in *"✗ 0"*) ;; *) fail=1;; esac   # ✗ гейта продукту = exit 1 (S36: без цього рядка новий файл поза INDEX проходив)
 last=$(grep -m1 -oE "^\| 20[0-9]{2}-[0-9]{2}-[0-9]{2}" "$AUDITF" 2>/dev/null | tr -d '| ')
 if [ -n "$last" ]; then days=$(( ( $(date +%s) - $(date -d "$last" +%s) ) / 86400 )); [ "$days" -gt 30 ] && aud="аудит правил: $days дн. — ПОРА" || aud="аудит правил: $days дн. тому"; else aud="аудит правил: журналу нема"; fi
 INSTR="CLAUDE.md .claude/settings.json"              # файли інструкцій репо (skills, профіль у репо — дописати)
@@ -56,13 +57,13 @@ else n=$(git rev-list --count --grep='Claude-Session' "$sm"..HEAD 2>/dev/null); 
 
 # прод (лише читання): GitHub Pages з кореня main. Живий index.html ≡ origin/main — за ВМІСТОМ; службове видно (перехідний стан Р-7 — ⚠).
 #   Pages віддає Cache-Control: max-age=600 і не дає його змінити (GitHub Support, webapps.stackexchange 119294; звірено 19.11.2026) →
-#   запит з ?cb=, а розбіжність ≤ 15 хв після коміту в main — ⚠ «кеш / деплой іде», не ✗.
+#   запит з ?cb=, а розбіжність ≤ 15 хв після коміту в main — ⚠ «кеш / деплой іде», не ✗. Під ENV_INJECT вікна нема: підкинуте — завжди ✗ (S36: у вікні зуби глухли).
 SITE=https://konst-andre.github.io/EquipLens
 lm=$(git show origin/main:index.html 2>/dev/null | md5sum | cut -c1-12); pm=$(curl -sS -m 20 "$SITE/?cb=$(date +%s)" 2>/dev/null | md5sum | cut -c1-12)
 [ -n "${ENV_INJECT:-}" ] && pm=000000000000
 mage=$(( $(date +%s) - $(git log -1 --format=%ct origin/main 2>/dev/null || echo 0) ))
 if [ "$lm" = "$pm" ]; then pr="прод: / ≡ origin/main:index.html ($pm)"
-elif [ "$mage" -le 900 ]; then pr="⚠ прод: / ($pm) ≠ origin/main ($lm) — коміт у main $((mage/60)) хв тому: кеш Pages / деплой іде, перевір за 10 хв"
+elif [ "$mage" -le 900 ] && [ -z "${ENV_INJECT:-}" ]; then pr="⚠ прод: / ($pm) ≠ origin/main ($lm) — коміт у main $((mage/60)) хв тому: кеш Pages / деплой іде, перевір за 10 хв"
 else pr="✗ прод: / ($pm) ≠ origin/main:index.html ($lm) — деплой не дійшов або сайт правили не з репо"; fail=1; fi
 q=$(curl -sS -m 10 "$SITE/lens/EquipLens_CHERGA.md" 2>/dev/null | head -c 600 | grep -c 'ЧЕРГА')
 [ "${q:-0}" -gt 0 ] && pr="$pr · ⚠ службове публікується (/lens/… — вміст видно; Р-7: сайт → docs/, вирішує Konst)"
@@ -75,6 +76,10 @@ s=$(cd tools && NODE_PATH="$HOME/.deps/node_modules${NODE_PATH:+:$NODE_PATH}" ti
 echo "стенд $(basename "$st"): --html${h#*ПІДСУМОК:} · смоук $(basename "$sm")${ENV_INJECT:+ --inject}: $s"
 if [ -n "${ENV_INJECT:-}" ]; then case "$s" in *ЗЛОВИВ*) ;; *) echo "✗ смоук --inject не зловив підкинутий дефект — гейт без зубів"; fail=1;; esac
 else case "$h" in *"✗ 0"*) ;; *) fail=1;; esac; case "$s" in *"✗0"*) ;; *) fail=1;; esac; fi
+# інвентар стенда (BUILD-1 Ф0): кожна одиниця — застосунок / harness / токени / мішане; непоміщене → ✗
+iv=$(python3 tools/stand_inventory.py ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "інвентар стенда${ENV_INJECT:+ --inject}: $iv"
+if [ -n "${ENV_INJECT:-}" ]; then case "$iv" in ЗЛОВИВ) ;; *) echo "✗ інвентар --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
+else case "$iv" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 
 # Спільні інструменти ядра — з КЛОНУ ядра поруч ($K, як профіль вище): виклик, не копія. Клон кладе setup script v3 середовища; нема клону — рядки «ядра поруч нема»: налаштувати середовище, не обходити curl-ом
 # (lens-governance:tools/claude-code/CLAUDE_CODE.md «Гачки»: ядро серед репо сесії або /tmp/lens-governance), тож «curl | python» з main — зайвий шлях
