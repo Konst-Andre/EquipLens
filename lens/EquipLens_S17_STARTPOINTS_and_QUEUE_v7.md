@@ -1,5 +1,6 @@
 > **живе доки:** не закритий **device-раунд** (`К1-в`, §14). Тоді числа §2/§3 стають вироками
 > в `EquipLens_head_valuesLOCK.md`, §8–§15 переїжджають у Cookbook том 3 і самері, файл гине.
+> **читається коли:** аудит `Г-11` або адреса «суп. §N» з брифу (`lens/STAND-1_brief.md`, `lens/BUILD-1_brief.md`) — точково, за розділом; цілком не береться (103 КБ).
 > Це **стартові гіпотези для крутіння**, НЕ лок. Жодне число тут не пройшло девайс.
 > **Витісняє:** `EquipLens_S17_STARTPOINTS_and_QUEUE.md` (редакція 24.08)
 >
@@ -702,7 +703,7 @@ aurLayers.toString()` — за **ознакою участі в генераці
 ## §17 · ЗНАЙДЕНЕ В `MASTER_LOCK` (S19) — виправляє §13
 
 ⚠ `EquipLens_MASTER_LOCK.md` **відсутній у Project** — тягнеться з репо:
-`raw.githubusercontent.com/Konst-Andre/lens-governance/main/products/EquipLens_MASTER_LOCK.md`
+`lens/EquipLens_MASTER_LOCK.md` (до G-Y — у ядрі, `products/`)
 Три «загублені ідеї» §13 виявились **залоченими рішеннями, не виконаними в коді**.
 
 ### Н-8 — не нова ідея. Розділ «Іконка в бейджі 🔒» (S5, уточнено S6)

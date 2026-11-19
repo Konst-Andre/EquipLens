@@ -2,7 +2,7 @@
 
 # EquipLens
 
-Польовий нотатник потреби в обладнанні аптек — PWA, один HTML-файл. Окремий продукт від QR Lens (межа — `lens/EquipLens_MASTER_LOCK.md` §2, злиття заборонене).
+Продукт сімейства Lens (PWA). Що це, стан і як працюємо — `CLAUDE.md`; карта — `REPO_LAYOUT.md`.
 Правила роботи — у ядрі родини: [`Konst-Andre/lens-governance`](https://github.com/Konst-Andre/lens-governance) (`kernel/`). Цей репо самодостатній: код, канон, самері, стенди — тут.
 
 ## Де що
