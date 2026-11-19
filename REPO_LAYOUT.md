@@ -54,3 +54,4 @@ EquipLens/
 |---|---|---|
 | `lens-governance:products/EquipLens/` | `lens/` · `archive/` | G-Y, 24.09.2026 |
 | сайт у корені | `docs/` (Р-7) | ⬜ — після перемикання Pages Konst |
+| стенд `tools/EquipLens_headbench_v*.html` (один файл) | дерево джерел (`src/`) + збірка в один HTML (`tools/build.py`), значення — із засіву стенда | ⬜ — на `БІЛД` черги, за `lens-governance:kernel/Lens_ARCH-1_brief.md` (К5 тут; канон дерева в ядрі ще не написаний — К2–К3) |
