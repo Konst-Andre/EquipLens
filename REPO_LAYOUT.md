@@ -9,7 +9,7 @@
 0. `bash tools/env_check.sh` (диспетчер ядра кладе його ⚠ / ✗ у перше повідомлення сам)
 1. `CLAUDE.md`
 2. найновіше самері в `sessions/` — §0 «ВІДКРИТЕ»
-3. `lens/EquipLens_CHERGA.md` — цілком; бриф пункту (`lens/EquipLens_<id>_brief.md`) — коли береш пункт
+3. `lens/EquipLens_CHERGA.md` — цілком; бриф пункту (`lens/<id>_brief.md`) — коли береш пункт
 4. точково: `lens/EquipLens_MASTER_LOCK.md` (вироки) → `lens/EquipLens_Z_REGISTR.md` (адреси З-номерів) → специфікації `lens/EquipLens_K21_*`
 
 ## Дерево
@@ -54,4 +54,4 @@ EquipLens/
 |---|---|---|
 | `lens-governance:products/EquipLens/` | `lens/` · `archive/` | G-Y, 24.09.2026 |
 | сайт у корені | `docs/` (Р-7) | ⬜ — після перемикання Pages Konst |
-| стенд `tools/EquipLens_headbench_v*.html` (один файл) | дерево джерел (`src/`) + збірка в один HTML (`tools/build.py`), значення — із засіву стенда | ⬜ — на `БІЛД` (`lens/EquipLens_BUILD-1_brief.md`), за `lens-governance:kernel/Lens_ARCH-1_brief.md` (К5 тут; канон дерева в ядрі ще не написаний — К2–К3) |
+| стенд `tools/EquipLens_headbench_v*.html` (один файл) | дерево джерел (`src/`) + збірка в один HTML (`tools/build.py`), значення — із засіву стенда | ⬜ — на `БІЛД` (`lens/BUILD-1_brief.md`), за `lens-governance:kernel/Lens_ARCH-1_brief.md` (К5 тут; канон дерева в ядрі ще не написаний — К2–К3) |

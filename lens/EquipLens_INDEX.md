@@ -18,9 +18,9 @@
 
 | файл | що |
 |---|---|
-| `lens/EquipLens_STAND-1_brief.md` | бриф `STAND-1`: стенд до білда |
-| `lens/EquipLens_BUILD-1_brief.md` | бриф `BUILD-1`: порт стенда в PWA |
-| `lens/EquipLens_HOST-1_brief.md` | бриф `HOST-1`: Pages → Cloudflare Workers |
+| `lens/STAND-1_brief.md` | бриф `STAND-1`: стенд до білда |
+| `lens/BUILD-1_brief.md` | бриф `BUILD-1`: порт стенда в PWA |
+| `lens/HOST-1_brief.md` | бриф `HOST-1`: Pages → Cloudflare Workers |
 
 ## Живі самері (стеля 2)
 
