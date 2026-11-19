@@ -34,6 +34,7 @@ EquipLens/
 |---|---|---|---|
 | `.claude/hooks/session-start.sh` | ставить інструменти гейтів: `jsdom` у `~/.deps` + `NODE_PATH` (для смоука) | сам, на старті сесії (реєстрація — `.claude/settings.json`; сесія з кількома репо — кличе диспетчер ядра) | `CLAUDE_CODE_REMOTE=true .claude/hooks/session-start.sh` |
 | `tools/env_check.sh` | база · гейт продукту (`Lens_validate --product`) · прод: `/` ≡ `origin/main:index.html` за вмістом, службове видно — ⚠ · стенд `--html` · смоук · `doc_health` · `shots_check` · версія; exit 1 — розібратись до роботи | перший крок кожної сесії (диспетчер ядра кличе сам) | `bash tools/env_check.sh` · зуби: `ENV_INJECT=1 bash tools/env_check.sh` → ✗ прод (підкинута розбіжність) · смоук «ЗЛОВИВ» |
+| `tools/audit_prompts.sh` | аудит інструкцій моделями (`/doctor prompt-audit`), клас 1 — opus, клас 2 — ще й sonnet; журнал — `lens/EquipLens_AUDIT.md` | змінив `CLAUDE.md` / правило — пакетом перед самері, після заміру лімітів | `bash tools/audit_prompts.sh 2 CLAUDE.md` |
 | `tools/smoke_v*.js` | механіка головного стенда (не значення важелів); живий — найбільший номер | після кожної правки стенда | `cd tools && node smoke_v17_30.js` · `--inject` |
 | `tools/EquipLens_K0_passport_audit.js` | аудит паспорта стенда К0 (самері S17 §4) | правка паспорта стенда | `cd tools && node EquipLens_K0_passport_audit.js` (шапка чекає `EquipLens_headbench_v17.html` поруч — ім'я застаріле, не перевіряв) |
 
