@@ -38,4 +38,4 @@
 
 - Самері — `sessions/EquipLens_session_summary_S<N>_<ТЕМА>.md`, живих рівно 2 (`sessions/README.md`); витіснене — `git mv` в `archive/summaries/` і рядок в INDEX.
 - Черга — `lens/EquipLens_CHERGA.md` (свій словник станів у шапці). Журнал аудиту правил — `lens/EquipLens_AUDIT.md`.
-- Вироки значень стенда — у `lens/EquipLens_MASTER_LOCK.md`; З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
+- Вироки продукту — у `lens/EquipLens_MASTER_LOCK.md` (значення стенда переходять туди лише на порті — `lens/BUILD-1_brief.md` Ф1); З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
