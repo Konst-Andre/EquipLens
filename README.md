@@ -9,7 +9,7 @@
 
 | тека | роль |
 |---|---|
-| `docs/` | **лише опублікований сайт**: `index.html` · `manifest` · іконки · `data/` · `media/`. Службове сюди не кладеться — сайт може жити на Cloudflare з приватного репо |
+| `docs/` | **лише опублікований сайт** (Р-7) — теки ще нема: сайт у корені, див. нижче |
 | `lens/` | канон продукту: `*_CHERGA` (відкрите) · `*_MASTER_LOCK` · `*_valuesLOCK` · реєстри |
 | `sessions/` | живі самері (стеля 2) |
 | `archive/` | витіснене: старі самері · стенди · матриці |
@@ -23,8 +23,5 @@
 
 ## Як почати сесію
 
-```bash
-curl -sO https://raw.githubusercontent.com/Konst-Andre/lens-governance/main/kernel/Lens_start.py
-python3 Lens_start.py --product EquipLens --summary-of EquipLens
-```
-Далі — порядок читання з `lens-governance:kernel/Lens_INDEX.md` §1: черга `lens/EquipLens_CHERGA.md` цілком → живе самері з `sessions/` (§0 «ВІДКРИТЕ») → `Work_Standard.md` точково.
+Claude Code: `CLAUDE.md` (як працюємо) → `REPO_LAYOUT.md` (карта) → `bash tools/env_check.sh` (диспетчер ядра кличе його сам).
+Прилади ядра — з клону `lens-governance` поруч або `/tmp/lens-governance`, не `curl` з `main` (`lens-governance:tools/claude-code/ADOPT.md` 4-а).
