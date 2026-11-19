@@ -10,7 +10,7 @@
 - **Старт сесії:** рядки ⚠ / ✗ `env_check` кладе диспетчер ядра (нема — `bash tools/env_check.sh` руками) → `REPO_LAYOUT.md` → найновіше самері в `sessions/` (§0) → `lens/EquipLens_CHERGA.md` цілком → точково `lens/EquipLens_MASTER_LOCK.md` · `lens/EquipLens_Z_REGISTR.md`.
 - **Гілка:** робота — на гілці `claude/…`; `main` — лише з «так» Konst: **кожен коміт у `main` = деплой GitHub Pages** (публікується корінь репо, разом зі службовим). Push відхилено — `git pull --rebase`, ніколи force.
 - **Пристрій приймання:** телефон (стенд і майбутня PWA). Браузер звужує, телефон вирішує.
-- **Дизайн-основа:** токенів окремим файлом ще нема — джерело значень зараз стенд: об'єкт `S` (важелі) і засів `LOCK_SEED` у `tools/EquipLens_headbench_v*.html`; у канон (`lens/EquipLens_MASTER_LOCK.md`) вони переходять лише в момент порту в білд (ПОРТ-ЧИСЕЛ — `lens/BUILD-1_brief.md` §2). Друга поверхня — нема. Іменний простір стенда: `nav*` — коробка острівця, `nv*` — вміст кнопки (S35 §1).
+- **Дизайн-основа:** токенів окремим файлом ще нема — джерело значень зараз стенд: об'єкт `S` (важелі) і засів `LOCK_SEED` у `tools/EquipLens_headbench_v*.html`; у канон (окремий файл lens/EquipLens_head_valuesLOCK.md — рішення (а) 19.11.2026; створить `BUILD-1` Ф1) вони переходять лише в момент порту в білд (ПОРТ-ЧИСЕЛ — `lens/BUILD-1_brief.md` §2). Друга поверхня — нема. Іменний простір стенда: `nav*` — коробка острівця, `nv*` — вміст кнопки (S35 §1).
 
 ## Де що живе і як потрапляє в прод
 
@@ -38,4 +38,4 @@
 
 - Самері — `sessions/EquipLens_session_summary_S<N>_<ТЕМА>.md`, живих рівно 2 (`sessions/README.md`); витіснене — `git mv` в `archive/summaries/` і рядок в INDEX.
 - Черга — `lens/EquipLens_CHERGA.md` (свій словник станів у шапці). Журнал аудиту правил — `lens/EquipLens_AUDIT.md`.
-- Вироки продукту — у `lens/EquipLens_MASTER_LOCK.md` (значення стенда переходять туди лише на порті — `lens/BUILD-1_brief.md` Ф1); З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
+- Вироки продукту — у `lens/EquipLens_MASTER_LOCK.md` (значення стенда — не сюди, а в lens/EquipLens_head_valuesLOCK.md на порті, `lens/BUILD-1_brief.md` Ф1); З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
