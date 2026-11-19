@@ -32,6 +32,7 @@
 | `lens/EquipLens_K21_PANEL_SPEC_v1.md` | специфікація панелі K21 |
 | `lens/EquipLens_K21_PANEL_SPEC_v1_ADDENDUM_4b.md` | доповнення 4b до K21 |
 | `lens/EquipLens_AUDIT.md` | журнал аудиту інструкцій (`CLAUDE.md` тощо); формула — у ядрі |
+| `lens/shots/README.md` | примірка UI-рішень наперед — стан кожної (`SHOTS.md` ядра) |
 | `lens/EquipLens_S17_STARTPOINTS_and_QUEUE_v7.md` | супутник (105 KB, жодного разу не ревізований — аудит `Г-11` черги ядра) |
 
 ## Стенди й інструменти

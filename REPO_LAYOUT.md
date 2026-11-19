@@ -20,7 +20,8 @@ EquipLens/
 ├─ REPO_LAYOUT.md     ця карта
 ├─ index.html         живий сайт — «Посібник з POS-обладнання» (GitHub Pages публікує корінь main)
 ├─ data/  media/      дані й фото; у коді index.html не згадані (греп 19.11.2026)
-├─ lens/              канон: черга · MASTER_LOCK · реєстри · специфікації · INDEX (перелік для гейта)
+├─ lens/              канон: черга · MASTER_LOCK · реєстри · специфікації · INDEX (перелік для гейта) · AUDIT
+│  └─ shots/          примірка UI-рішень наперед (README — стан)
 ├─ sessions/          живі самері (стеля 2)
 ├─ tools/             стенд з важелями, смоук, прилади
 ├─ sources/           оригінали (xlsx, zip, фото)
