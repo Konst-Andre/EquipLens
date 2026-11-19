@@ -10,11 +10,11 @@
 
 ## §0 · ВІДКРИТЕ
 
-0. **💡 чекає вироку Konst — план §3 (етап 4 ADOPT).** До «так» нічого з каркаса не створюю. Питання етапу 2 — у §2.
-1. **frame_check (вручну, див. п. 2):** ⚠ «EquipLens не адаптоване: нема `CLAUDE.md`» (`lens-governance:tools/claude-code/frame_check.sh`, функція `check_core`). Бракує також: `tools/env_check.sh` · `.claude/hooks/session-start.sh` (зареєстрований і +x) · `tools/audit_prompts.sh` (копія ядра) · `lens/EquipLens_AUDIT.md` · рядок «Дизайн-основа:» · виклики `doc_health`/`shots_check`/`version_check` з `env_check` · `lens/shots/README.md`.
-2. **Скрипти ядра з `/tmp/lens-governance` у режимі Auto не запускаються:** класифікатор відхилив `frame_check.sh` («Undermining Oversight») і `kernel/Lens_validate.py --product .` («Unauthorized Access»), 19.11.2026. Тому знімок гейтів «до» не знятий, frame_check зроблено читанням коду. Без рішення (💡 §4-1) `env_check`, що кличе ядро з клону (ADOPT 4-а), у сесіях Auto не працюватиме.
-3. **ARCH-1 — вхід плану, не окремий захід:** у ядрі К2–К4 ще не зроблені (`tools/claude-code/PWA_FRAME.md` нема — `ls`, 19.11.2026). К5 (польова перевірка в EquipLens) іде після них і після `БІЛД` черги. Тому в плані лише зарезервовано дім дерева (§3, К-7).
-4. **Борг аудиту:** аудит класу 2 нового `CLAUDE.md` (ADOPT «Приймання») — після К-1. Ліміт тижня 0,82 на старті — може не встигнути.
+0. **💡 чекає вироку Konst (відкрите, 19.11.2026) — план §3 (етап 4 ADOPT).** До «так» нічого з каркаса не створюю. Питання етапу 2 — у §2.
+1. **frame_check (вручну, див. п. 2):** ⚠ «EquipLens не адаптоване: нема CLAUDE.md у корені» (`lens-governance:tools/claude-code/frame_check.sh`, функція `check_core`). Бракує ще (файлів поки нема — створює план §3): env_check у tools/ · хук старту в .claude/hooks/ (зареєстрований і +x) · копія audit_prompts.sh ядра в tools/ · журнал аудиту в lens/ · рядок «Дизайн-основа:» · виклики doc_health / shots_check / version_check з env_check · тека lens/shots/ з README.
+2. **Скрипти ядра з `/tmp/lens-governance` у режимі Auto не запускаються:** класифікатор відхилив `lens-governance:tools/claude-code/frame_check.sh` («Undermining Oversight») і `lens-governance:kernel/Lens_validate.py --product .` («Unauthorized Access»), 19.11.2026. Тому знімок гейтів «до» не знятий, frame_check зроблено читанням коду. Без рішення (💡 §4-1) `env_check`, що кличе ядро з клону (ADOPT 4-а), у сесіях Auto не працюватиме.
+3. **ARCH-1 — вхід плану, не окремий захід:** у ядрі К2–К4 ще не зроблені (у ядрі нема файла tools/claude-code/PWA_FRAME.md — `ls`, 19.11.2026; бриф — `lens-governance:kernel/Lens_ARCH-1_brief.md` §5). К5 (польова перевірка в EquipLens) іде після них і після `БІЛД` черги. Тому в плані лише зарезервовано дім дерева (§3, К-7).
+4. **Борг аудиту:** аудит класу 2 нового CLAUDE.md кореня (ADOPT «Приймання») — після К-1. Ліміт тижня 0,82 на старті — може не встигнути.
 
 ## §1 · ХІД
 
