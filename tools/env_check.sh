@@ -118,7 +118,7 @@ if [ -f "$CC/doc_health.py" ]; then python3 "$CC/doc_health.py" .; else echo "д
 if [ -f "$CC/shots_check.py" ]; then python3 "$CC/shots_check.py" . || fail=1; else echo "примірка: — (ядра поруч нема: $K)"; fi
 # версія застосунку B · rev (VER-1, lens-governance:tools/claude-code/VERSIONS.md) — лише репо з інтерфейсом; параметри свого продукту:
 #   --code <файл коду застосунку> --re '<мітка: група B, група rev>' [--name '<шлях файлу білда з групою B>']
-echo "⚠ версія: мітки ще нема — білда нема, є лише стенд (VER-1 — разом з білдом)"
+echo "⚠ версія: мітки ще нема — білд docs/ є з Ф2-1, мітка версії — VER-1 з першим портом частини застосунку (Ф3)"
 # if [ -f "$CC/version_check.py" ]; then python3 "$CC/version_check.py" . --code <файл> --re '<регулярка>' ${ENV_INJECT:+--inject} || fail=1; else echo "версія: — (ядра поруч нема: $K)"; fi
 # зуби: ENV_INJECT=1 bash tools/env_check.sh — прилади з --inject підкидають ваду й мусять дати ✗ (зразок — QR-Lens:tools/env_check.sh; аудит 24.10.2026).
 # Мітки в коді ще нема (продукт заводить версію) — рядок «⚠ версія: мітки ще нема», не ✗ (зразок — AE-Simulator:tools/env_check.sh).
