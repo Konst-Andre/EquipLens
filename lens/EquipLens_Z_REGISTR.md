@@ -102,7 +102,7 @@
 | `З-54` | 🔴 Важіль оголошено всюди, крім місця, де його слухають. | `EquipLens_session_summary_S25_K10_EDGE.md`:54 | ⬜ тільки самері |  |
 | `З-55` | Стос Е-5 був невидимий за побудовою. | `EquipLens_session_summary_S25_K10_EDGE.md`:62 | ⬜ тільки самері |  |
 | `З-56` | Device-вирок, знятий із дефектної збірки, треба анулювати явно. | `EquipLens_session_summary_S25_K10_EDGE.md`:69 | ✅ у каноні · wsd `2.15` |  |
-| `З-57` | A101-б):** `--ridge` з `.el-item` · `--lift`+`--ridge | `EquipLens_session_summary_S28_K22b_FLOK.md`:33 | 🟡 у буфері | 🔑 |
+| `З-57` | Бульбашка «+»: `fabSat` мертвий без `fabBlur` (рядок полагоджено 20.11.2026 S37 — `ADR-1`: був уламок рядка 33). | `EquipLens_session_summary_S28_K22b_FLOK.md`:17 | 🟡 у буфері | 🔑 |
 | `З-58` | Ідея, народжена в сесії, не звірялась із кукбуком — і повторила анти-патерн | `EquipLens_session_summary_S26_CARD_PIVOT.md`:96 | ⬜ тільки самері |  |
 | `З-59` | У буфері стендів дві різні знахідки під однією літерою `Д-В | `EquipLens_session_summary_S26_CARD_PIVOT.md`:112 | 🟡 у буфері |  |
 | `З-60` | Подвійний кант — не дефект, а безкоштовна друга поверхня | `EquipLens_session_summary_S27_K22a_CARD_DONE.md`:76 | ⬜ тільки самері |  |
