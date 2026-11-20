@@ -24,7 +24,7 @@ EquipLens/
 │  ├─ shots/          примірка UI-рішень наперед (README — стан)
 │  └─ evidence/       докази вад до примірки (знімки Konst, плівка машини) — оголошено в INDEX, видаляються з закриттям пункту
 ├─ sessions/          живі самері (стеля 2)
-├─ src/               джерела білда (BUILD-1 Ф2): shell.html (оболонка з мітками) · css/ (5 шарів @layer) · js/ · fonts/ (Manrope-підмножина + OFL, згенеровано tools/fonts.py) · brand/ (SVG знака й іконок) і icons/ (PNG) — згенеровано tools/brand.py · manifest.webmanifest
+├─ src/               джерела білда (BUILD-1 Ф2): shell.html (оболонка з мітками) · css/ (5 шарів @layer) · js/ · fonts/ (Manrope-підмножина + OFL, згенеровано tools/fonts.py) · brand/ (SVG гліфа й знака, HTML-кадри іконок) і icons/ (PNG) — згенеровано tools/brand.py · manifest.webmanifest
 ├─ docs/              ЗІБРАНИЙ білд — docs/index.html (tools/build.py build; руками не правити). Тека сайту за Р-7: на гілці — так, у main — лише з HOST-1 Б
 ├─ tools/             стенд з важелями, смоук, прилади, збірка
 ├─ sources/           оригінали (xlsx, zip, фото; fonts/ — Manrope[wght].ttf + OFL, джерело підмножини)

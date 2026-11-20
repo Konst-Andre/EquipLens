@@ -8,11 +8,12 @@
 stand_inventory.py --values --check). Кольори — обчислені стендом для кожної теми (тацю малює градієнт --g1→--g2, решту --ink);
 у SVG іконки вони літералами: у окремому файлі var(--g1) розв'язувати нема від чого.
 
-  python3 tools/brand.py icons            — src/brand/mark.svg (гліф як у стенді) · src/brand/icon-any.svg · icon-mask.svg →
-                                            PNG у src/icons/ (Chromium; RGB без альфи — iOS під альфу підкладає чорне, A75 п.1;
-                                            у кожен PNG вшито печатку tEXt «equiplens-src» = sha256 його SVG) · аркуш порівняння
-                                            фону (світла / темна) — у теку з аргументу --sheet <тека>, у git не йде
-  python3 tools/brand.py --check          — SVG знову виходить зі стенда ≡ закоміченим · PNG: розмір, тип 2 (непрозорий),
+  python3 tools/brand.py icons            — src/brand/mark.svg (гліф як у стенді) · src/brand/icon-any.html · icon-mask.html
+                                            (кадр «скло на аврорі»: фон — аврора теми стенда, гліф шаром скла; стилі — STYLES,
+                                            ставка ICON_STYLE) → PNG у src/icons/ (Chromium 1024 → Lanczos; RGB без альфи — iOS під
+                                            альфу підкладає чорне, A75 п.1; печатка tEXt «equiplens-src» = sha256 кадру) · аркуш
+                                            стилів на трьох шпалерах — --sheet <тека>, у git не йде
+  python3 tools/brand.py --check          — кадри знову виходять зі стенда ≡ закоміченим · PNG: розмір, тип 2 (непрозорий),
                                             печатка ≡ SVG · маніфест: id "./", any і maskable окремо (не «any maskable»),
                                             розміри ≡ файлам, фон ≡ --canvas стенда · оболонка: посилання й meta (A1, A55)
   python3 tools/brand.py wordmark [--zip <архів набору>] — знак «EquipLens» контуром Chillax (вирок «А» Konst, S38) →
@@ -59,6 +60,7 @@ PROBE = r"""(theme) => {
     sw: getComputedStyle(svg).strokeWidth, cap: getComputedStyle(svg).strokeLinecap, join: getComputedStyle(svg).strokeLinejoin,
     ink: getComputedStyle(svg.closest('.el-mk')).color, g1: rgb(cs.getPropertyValue('--g1')), g2: rgb(cs.getPropertyValue('--g2')),
     canvas: rgb(cs.getPropertyValue('--canvas')), trayPaint: tray ? tray.dataset.p : '',
+    aur: cs.backgroundImage, bgc: cs.backgroundColor,
     grad: grad ? ['x1','y1','x2','y2'].map(a => grad.getAttribute(a)) : null,
     bbox: [bb.x, bb.y, bb.width, bb.height] };
 }"""
@@ -109,95 +111,131 @@ def mark_svg(pr):
             f'stroke-width="{sw}" stroke-linecap="{pr["cap"]}" stroke-linejoin="{pr["join"]}">{pr["inner"]}</svg>\n')
 
 
-def icon_svg(pr, kind, theme):
-    """Іконка: суцільний фон --canvas теми · гліф по центру, габарит FRAC[kind] сторони · кольори літералами."""
-    sw = float(pr['sw'].replace('px', ''))
-    x, y, w, h = pr['bbox']
-    x, y, w, h = x - sw / 2, y - sw / 2, w + sw, h + sw          # габарит зі штрихом
+STYLES = {  # фон · гліф: заливка аркуша (верх, низ) · обідок (світло, тінь) · лінії · таця · тінь аркуша
+    # «скло на аврорі»: фон — аврора теми стенда (обчислений background-image #sbox), гліф — шар скла поверх,
+    # як капсули шапки (біла заливка + один рівний обідок) — мова HIG Liquid Glass, запечена в PNG; кант іконки НЕ малюємо
+    # (його дає iOS нативним; запечений — подвоїться, HIG: «remove specular» з артворку):
+    # веб-кліп iOS бере пласку картинку, системного скла до неї нема (developer.apple.com/forums/thread/801448, 20.11.2026)
+    'aurora-dark': dict(theme='dark', fill=('rgba(255,255,255,.26)', 'rgba(255,255,255,.08)'), rim='rgba(255,255,255,.72)',
+                        ink='rgba(255,255,255,.92)', tray='acc', shadow=.25),
+    'aurora-light': dict(theme='light', fill=('rgba(255,255,255,.85)', 'rgba(255,255,255,.45)'), rim='rgba(110,110,140,.45)',
+                         ink=None, tray='acc', shadow=.12),
+    'accent': dict(theme='light', fill=('rgba(255,255,255,.26)', 'rgba(255,255,255,.08)'), rim='rgba(255,255,255,.72)',
+                   ink='rgba(255,255,255,.92)', tray='#FFFFFF', shadow=.25),
+}
+ICON_STYLE = 'aurora-dark'   # ставка S38 (макет на шпалерах Konst); вирок — Konst на телефоні (A75 «фон — device-рішення»)
+ICON_SW = 1.5                # штрих гліфа в іконці (у шапці 1.2): HIG — передній план іконки сміливіший; рядок d — той самий
+ICON_CSS = 390               # px сторона кадру: аврора стенда задана в px під екран 390 — кадр тієї ж ширини
+
+
+def icon_html(pr, kind, style):
+    """Іконка — HTML-кадр 390×390: фон теми стенда + гліф Н5 шаром скла. Кольори — літералами (окремий файл)."""
+    st = STYLES[style]
+    L = pr[st['theme']]
+    sw = ICON_SW
+    x, y, w, h = L['bbox']
+    x, y, w, h = x - sw / 2, y - sw / 2, w + sw, h + sw
     side = max(w, h) / FRAC[kind]
     vx, vy = x + w / 2 - side / 2, y + h / 2 - side / 2
-    g = pr['grad'] or ['0', '0', '1', '1']
-    body = paths(pr).replace('class="el-tray" data-p="grad"', 'stroke="url(#g)"')
-    if pr['trayPaint'] == 'accent':
-        body = body.replace('class="el-tray" data-p="accent"', f'stroke="{hexc(pr["g1"])}"')
-    return (f'<!-- іконка «{kind}» · тема {theme} · згенеровано tools/brand.py icons зі стенда v17_30 (A75); руками не правити -->\n'
-            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{num(vx)} {num(vy)} {num(side)} {num(side)}">'
-            f'<rect x="{num(vx)}" y="{num(vy)}" width="{num(side)}" height="{num(side)}" fill="{hexc(pr["canvas"])}"/>'
-            f'<defs><linearGradient id="g" x1="{g[0]}" y1="{g[1]}" x2="{g[2]}" y2="{g[3]}">'
-            f'<stop stop-color="{hexc(pr["g1"])}"/><stop offset="1" stop-color="{hexc(pr["g2"])}"/></linearGradient></defs>'
-            f'<g fill="none" stroke="{hexc(pr["ink"])}" stroke-width="{num(sw)}" stroke-linecap="{pr["cap"]}" '
-            f'stroke-linejoin="{pr["join"]}">{body}</g></svg>\n')
+    ps = re.findall(r'<path[^>]*\sd="([^"]+)"', paths(L))
+    doc, fold, lines, tray = ps[0], ps[1], ps[2:-1], ps[-1]
+    m = re.match(r'M([\d.]+) [\d.]+V([\d.]+)Q[\d.]+ ([\d.]+) ([\d.]+) [\d.]+H([\d.]+)', doc)
+    if not m:
+        raise SystemExit(f'аркуш гліфа не тієї форми, що чекає прилад: {doc[:60]} — Н5 змінився? онови icon_html')
+    xl, T, xr = float(m.group(1)), float(m.group(3)), float(m.group(5))
+    r = float(m.group(4)) - xl
+    g1, g2 = hexc(L['g1']), hexc(L['g2'])
+    ink = st['ink'] or hexc(L['ink'])
+    tr = 'url(#acc)' if st['tray'] == 'acc' else st['tray']
+    k = f' stroke-linecap="{L["cap"]}" stroke-linejoin="{L["join"]}"'
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{num(vx)} {num(vy)} {num(side)} {num(side)}">'
+           f'<defs><linearGradient id="acc" x1="0" y1="0" x2="1" y2="1"><stop stop-color="{g1}"/><stop offset="1" stop-color="{g2}"/></linearGradient>'
+           f'<linearGradient id="fill" x1="0" y1="0" x2=".4" y2="1"><stop stop-color="{st["fill"][0]}"/><stop offset="1" stop-color="{st["fill"][1]}"/></linearGradient>'
+           '<filter id="sh" filterUnits="userSpaceOnUse" x="-20" y="-20" width="64" height="64"><feGaussianBlur stdDeviation=".9"/></filter>'
+           '<filter id="glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="64" height="64"><feGaussianBlur stdDeviation=".6"/></filter></defs>'
+           f'<g fill="none"{k}>'
+           f'<path d="{doc}Z" fill="rgba(0,0,0,{st["shadow"]})" transform="translate(0 .9)" filter="url(#sh)"/>'   # тінь шару
+           f'<path d="{doc}Z" fill="url(#fill)"/>'                                                                 # тіло скла
+           f'<path d="{doc}" stroke="{st["rim"]}" stroke-width="{num(sw * .87)}"/><path d="{fold}" stroke="{st["rim"]}" stroke-width="{num(sw * .87)}"/>'
+           + ''.join(f'<path d="{l}" stroke="{ink}" stroke-width="{num(sw)}"/>' for l in lines)
+           + f'<path d="{tray}" stroke="{tr}" stroke-width="{num(sw * 1.25)}" opacity=".28" filter="url(#glow)"/>'  # ледь-ореол таці (Konst S38: глоу був сильний)
+           f'<path d="{tray}" stroke="{tr}" stroke-width="{num(sw * 1.15)}"/></g></svg>')
+    if style == 'accent':
+        bg = f'background:linear-gradient(150deg,{g1},{g2})'
+    else:
+        bg = f'background-color:{L["bgc"]};background-image:{L["aur"]}'
+    return (f'<!-- іконка «{kind}» · стиль {style} · згенеровано tools/brand.py icons зі стенда v17_30 (A75); руками не правити -->\n'
+            f'<!doctype html><style>html,body{{margin:0}}.i{{position:relative;width:{ICON_CSS}px;height:{ICON_CSS}px;overflow:hidden;{bg}}}'
+            f'.i svg{{position:absolute;inset:0;width:100%;height:100%}}</style><div class="i">{svg}</div>\n')
 
 
-def sources(pr):
+def sources(pr, style=ICON_STYLE):
     return {'mark.svg': mark_svg(pr['light']),
-            'icon-any.svg': icon_svg(pr['light'], 'any', 'light'),
-            'icon-mask.svg': icon_svg(pr['light'], 'mask', 'light')}
+            'icon-any.html': icon_html(pr, 'any', style),
+            'icon-mask.html': icon_html(pr, 'mask', style)}
 
 
 def sha(text):
     return hashlib.sha256(text.encode('utf-8')).hexdigest()[:16]
 
 
-def raster(svgs, sizes):
-    """{(ім'я, розмір): svg} → {(ім'я, розмір): RGB Image} через Chromium (той самий рушій, що малює гліф на телефоні Android)."""
+def raster(docs):
+    """{ключ: HTML-кадр} → {ключ: RGB 1024×1024} через Chromium (кадр 390 css × масштаб 1024/390)."""
     from playwright.sync_api import sync_playwright
     from PIL import Image
     import io
     out = {}
     with sync_playwright() as p:
         b = p.chromium.launch()
-        for (name, n), svg in svgs.items():
-            pg = b.new_page(viewport={'width': n, 'height': n}, device_scale_factor=1)
-            body = re.sub(r'^<!--.*?-->\n', '', svg).replace('<svg ', f'<svg width="{n}" height="{n}" ', 1)
-            pg.set_content(f'<!doctype html><style>html,body{{margin:0}}svg{{display:block}}</style>{body}')
-            out[(name, n)] = Image.open(io.BytesIO(pg.screenshot(clip={'x': 0, 'y': 0, 'width': n, 'height': n}))).convert('RGB')
+        for key, html in docs.items():
+            pg = b.new_page(viewport={'width': ICON_CSS, 'height': ICON_CSS}, device_scale_factor=1024 / ICON_CSS)
+            pg.route('**/*', lambda r: r.abort())
+            pg.set_content(html)
+            im = Image.open(io.BytesIO(pg.screenshot())).convert('RGB')
+            out[key] = im if im.size == (1024, 1024) else im.resize((1024, 1024), Image.LANCZOS)
             pg.close()
         b.close()
     return out
 
 
 def cmd_icons(argv):
-    from PIL import PngImagePlugin
+    from PIL import Image, PngImagePlugin
     pr = probe()
     os.makedirs(BRAND, exist_ok=True)
     os.makedirs(os.path.join(SRC, 'icons'), exist_ok=True)
     src = sources(pr)
     for f, t in src.items():
         open(os.path.join(BRAND, f), 'w', encoding='utf-8').write(t)
-    want = {(('icon-' + k + '.svg'), n): src['icon-' + k + '.svg'] for _, n, k in ICONS}
-    imgs = raster(want, None)
+    big = raster({k: src['icon-' + k + '.html'] for k in FRAC})
     for f, n, k in ICONS:
         info = PngImagePlugin.PngInfo()
-        info.add_text(SEAL, sha(src['icon-' + k + '.svg']))
-        imgs[('icon-' + k + '.svg', n)].save(os.path.join(SRC, 'icons', f), pnginfo=info, optimize=True)
+        info.add_text(SEAL, sha(src['icon-' + k + '.html']))
+        big[k].resize((n, n), Image.LANCZOS).save(os.path.join(SRC, 'icons', f), pnginfo=info, optimize=True)
         print(f'  src/icons/{f} · {n}×{n} · {os.path.getsize(os.path.join(SRC, "icons", f))} Б')
     if '--sheet' in argv:
-        d = argv[argv.index('--sheet') + 1]
-        sheet(pr, d)
-    print(f'записано src/brand/ ({", ".join(src)}) і {len(ICONS)} PNG · фон світлої {hexc(pr["light"]["canvas"])} · темної {hexc(pr["dark"]["canvas"])}')
+        sheet(pr, argv[argv.index('--sheet') + 1])
+    print(f'записано src/brand/ ({", ".join(src)}) і {len(ICONS)} PNG · стиль {ICON_STYLE}')
     return 0
 
 
 def sheet(pr, d):
-    """Аркуш для вироку фону (A75 «фон — device-рішення»): обидві теми, 60 pt серед світлих і темних шпалер. У git — ні."""
+    """Аркуш вироку стилю (A75 «фон — device-рішення»): кожен стиль 180 px під маскою iOS на світлих, темних і фото-шпалерах. У git — ні."""
     from PIL import Image, ImageDraw
     os.makedirs(d, exist_ok=True)
-    svgs = {(f'{t}', 180): icon_svg(pr[t], 'any', t) for t in ('light', 'dark')}
-    im = raster(svgs, None)
-    W = Image.new('RGB', (2 * 3 * 200 + 40, 260), '#FFFFFF')
-    dr = ImageDraw.Draw(W)
-    walls = [('#F2F2F7', 'світлі'), ('#1C1C1E', 'темні'), ('#6B8FA8', 'фото')]
+    big = raster({s: icon_html(pr, 'any', s) for s in STYLES})
+    n, walls = 180, [('#F2F2F7', 'світлі'), ('#1C1C1E', 'темні'), ('#6B8FA8', 'фото')]
+    mask = Image.new('L', (n * 4, n * 4), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, n * 4 - 1, n * 4 - 1], radius=int(n * 4 * .225), fill=255)   # лише показ маски iOS
+    mask = mask.resize((n, n), Image.LANCZOS)
+    W = Image.new('RGB', (len(walls) * (len(STYLES) * 200 + 20), 260), '#FFFFFF')
     for i, (c, _) in enumerate(walls):
-        dr.rectangle([i * 400 + 10, 10, i * 400 + 400, 250], fill=c)
-        for j, t in enumerate(('light', 'dark')):
-            ico = im[(t, 180)]
-            mask = Image.new('L', (180, 180), 0)
-            ImageDraw.Draw(mask).rounded_rectangle([0, 0, 179, 179], radius=40, fill=255)   # лише показ маски iOS, у файлі — квадрат (A75 п.2)
-            W.paste(ico, (i * 400 + 20 + j * 190, 40), mask)
+        x0 = i * (len(STYLES) * 200 + 20)
+        ImageDraw.Draw(W).rectangle([x0 + 10, 10, x0 + len(STYLES) * 200 + 10, 250], fill=c)
+        for j, s in enumerate(STYLES):
+            W.paste(big[s].resize((n, n), Image.LANCZOS), (x0 + 20 + j * 200, 40), mask)
     p = os.path.join(d, 'icon_compare.png')
     W.save(p)
-    print(f'  аркуш порівняння: {p} (зліва в кожній парі — світла, справа — темна; шпалери: ' + ' · '.join(n for _, n in walls) + ')')
+    print(f'  аркуш стилів: {p} (у кожній групі: ' + ' · '.join(STYLES) + '; шпалери: ' + ' · '.join(nm for _, nm in walls) + ')')
 
 
 def values():
@@ -381,7 +419,7 @@ def cmd_check(inject):
         print('НЕ ЗЛОВИВ — нема Chromium' if inject else '─── знак: помилок 1 ✗ ───')
         return 1
     if inject:
-        pr['light']['sw'] = '1.6px'                                   # (1) штрих гліфа ≠ стенду
+        for t in pr: pr[t]['inner'] = pr[t]['inner'].replace('M5.6', 'M5.8', 1)   # (1) гліф ≠ стенду (обидві теми: іконка — з темної)
     src = sources(pr)
     for f, t in src.items():
         p = os.path.join(BRAND, f)
@@ -399,7 +437,7 @@ def cmd_check(inject):
             errs.append(f'src/icons/{f}: {m["w"]}×{m["h"]} ≠ {n}×{n}')
         if m['ctype'] != 2:
             errs.append(f'src/icons/{f}: тип кольору {m["ctype"]} ≠ 2 (RGB без альфи) — iOS підкладе чорне під прозоре (A75 п.1)')
-        seal = sha(open(os.path.join(BRAND, 'icon-' + k + '.svg'), encoding='utf-8').read()) if os.path.exists(os.path.join(BRAND, 'icon-' + k + '.svg')) else '?'
+        seal = sha(open(os.path.join(BRAND, 'icon-' + k + '.html'), encoding='utf-8').read()) if os.path.exists(os.path.join(BRAND, 'icon-' + k + '.html')) else '?'
         if inject and f == 'icon-512.png':
             seal = '0' * 16                                           # (3) застаріла печатка
         if m['text'].get(SEAL) != seal:
@@ -474,7 +512,7 @@ def cmd_check(inject):
     for e in errs:
         print('  ✗ ' + e)
     if inject:
-        caught = sum(any(s in e for e in errs) for s in ('src/brand/icon-any.svg', 'any maskable', 'icon-512.png: печатка', 'wordmark.svg зроблено з'))
+        caught = sum(any(s in e for e in errs) for s in ('src/brand/icon-any.html', 'any maskable', 'icon-512.png: печатка', 'wordmark.svg зроблено з'))
         print('ЗЛОВИВ' if caught == 4 else f'НЕ ЗЛОВИВ — з чотирьох підкидань спіймано {caught}')
         return 1 if caught == 4 else 0
     print(f'─── знак: помилок {len(errs)} ' + ('✓ ───' if not errs else '✗ ───'))
