@@ -23,13 +23,11 @@ const V = {
       base:{L:.970, C:.005, H:240}, s:{bg:'hybrid', bgH1L:220, bgH2L:250, bgH3L:210, bgA1L:12, bgA2L:12, bgA3L:10, bgSatL:30, bgLtL:70, haAL:10, bgTiltL:5}},
     {id:'C', name:'В · Світанок', src:'Dribbble AI (синій ↔ персиковий; кремову рамку h≈90 відкинуто — жовтизна) + Paperpillar (бузок h276): тепле — рожеве, не персик',
       base:{L:.952, C:.012, H:300}, s:{bg:'all', bgH1L:212, bgH2L:345, bgH3L:262, bgA1L:36, bgA2L:30, bgA3L:20, bgSatL:64, bgLtL:80, bgSpread:125, bgTiltL:2}},
-    {id:'D', name:'Г · Бірюзове скло', src:'GlassKit світла (glasskit.jungherz.com, фон, що сподобався Konst S40: холодна #F5F7FA → #E8ECF1 + бірюзова аврора) без бурштинового світіння — жовтизна',
-      base:{L:.945, C:.012, H:225}, s:{bg:'all', bgH1L:186, bgH2L:200, bgH3L:212, bgA1L:44, bgA2L:34, bgA3L:30, bgSatL:58, bgLtL:66, bgSpread:120, bgTiltL:3}},
+    /* Г «Бірюзове скло» (GlassKit світла) — відкинуто Konst S40: «для світлої теми вона не буде працювати» */
   ],
   dark: [
     {id:'now', name:'Зараз', src:'стенд v17_30: майже чорна основа (dkH 250 · C 7 · L 6) + синьо-фіолетова аврора', s:{}},
-    {id:'P', name:'Д1 · Петроль', src:'GlassKit темна (glasskit.jungherz.com — фон, що сподобався Konst S40; знімок: #1B4150 · L .34–.45 · C .05 · h≈225; токени #1B3E50 → #0E2530) — кольорова й приглушена; другорядний текст світліший (mutL 86, основа dkL 13): на петролі контраст падав до 3.3 — машина S40, тепер 4.6',
-      s:{dkH:200, dkC:42, dkL:13, dkS:4, dkR:8, mutL:86, valL:97, bgH1D:180, bgH2D:196, bgH3D:210, bgA1D:32, bgA2D:22, bgA3D:16, bgSatD:50, bgLtD:42, bgTiltD:2}},
+    /* Д1 «Петроль» (GlassKit темна) — відкинуто Konst S40: «слабша, ніж у мене темна» */
     {id:'I', name:'Д2 · Індиго', src:'Paperpillar (темна кнопка #0D0C21 · h283) + бузок lgcl — глибокий індиго, аврора бузкова з рожевим',
       s:{dkH:250, dkC:34, dkL:9, dkS:6, dkR:10, bgH1D:232, bgH2D:282, bgH3D:318, bgA1D:30, bgA2D:24, bgA3D:12, bgSatD:52, bgLtD:44, bgTiltD:2}},
   ]
@@ -68,14 +66,17 @@ css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8
 #fit button{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 #fit button[aria-pressed=true]{background:#3a5bd9;color:#fff;border-color:#3a5bd9}
 #fit .fs{opacity:.75;font-size:11.5px}
+#fit .fs[hidden]{display:none}
+#fit .fi{width:36px;height:36px;padding:0;border-radius:50%;font-weight:700}   /* «i» — тап, не наведення; ціль ≥ 36 px (пошук S40: uxmovement, SAP info popover) */
 #meter,#fab.bx-fab,.bx-bar{display:none!important}   /* службове стенда — не частина екрана; .bx-bar — свій перемикач теми стенда, не синхронізований з панеллю примірки (огляд прев'ю v1, S40) */
 body{padding-top:var(--fitH,120px)!important}`;
 document.head.appendChild(css);
 const bar = document.createElement('div'); bar.id = 'fit';
-bar.innerHTML = `<div class="row"><b style="align-self:center">Фон · примірка</b><button data-th="light">Світла</button><button data-th="dark">Темна</button></div><div class="row fv"></div><div class="fs"></div>`;
+bar.innerHTML = `<div class="row"><b style="align-self:center">Фон · примірка</b><button data-th="light">Світла</button><button data-th="dark">Темна</button><button class="fi" aria-expanded="false" aria-label="Звідки цей варіант">i</button></div><div class="row fv"></div><div class="fs" hidden></div>`;
 document.body.appendChild(bar);
 bar.addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
+  if (t.classList.contains('fi')) { const f = bar.querySelector('.fs'); f.hidden = !f.hidden; t.setAttribute('aria-expanded', String(!f.hidden)); return; }   /* пояснення — за «i» (Konst S40: текст займав верх екрана телефона) */
   if (t.dataset.th) pick(t.dataset.th, 'now'); else if (t.dataset.id) pick(cur.theme, t.dataset.id);
 });
 try { setPanel(false); } catch(_){}

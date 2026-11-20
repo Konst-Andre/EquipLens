@@ -46,8 +46,8 @@
 | `lens/shots/DES-1_bg/fit_bg.js` | примірка фону обох тем — накладка на стенд: важіль основи світлої (OKLCH) і варіанти з джерелами |
 | `lens/shots/DES-1_bg/shoot.js` | знімальник примірки фону: збирає сторінку (стенд + накладка), кадри обох тем і дані для машини |
 | `lens/shots/DES-1_bg/check_bg.py` | машина примірки фону: контраст у найгіршій точці · `SUN-1` сонячна проба · жовтизна · різниця варіантів (`--inject`) |
-| `lens/shots/DES-1_bg/light.webp` | смуга світлої: зараз · А · Б · В · Г |
-| `lens/shots/DES-1_bg/dark.webp` | смуга темної: зараз · Д1 · Д2 |
+| `lens/shots/DES-1_bg/light.webp` | смуга світлої: зараз · А · Б · В (Г відкинуто Konst S40) |
+| `lens/shots/DES-1_bg/dark.webp` | смуга темної: зараз · Д2 (Д1 відкинуто Konst S40) |
 | `lens/evidence/DES-1_swipe/konst_dark_list.webp` · `lens/evidence/DES-1_swipe/konst_dark_open_corners.webp` · `lens/evidence/DES-1_swipe/konst_light_closing_blink.webp` · `lens/evidence/DES-1_swipe/konst_light_open_corners.webp` · `lens/evidence/DES-1_swipe/machine_close_frames_both_themes.webp` | докази бага свайпу картки (`DES-1` п.25): знімки iPhone Konst 20.11.2026 (`konst_*`, стенд, синтетичні дані) + плівка машини (відкрито → закриття кожні 25 мс; верх світла, низ темна). Живе доки: п.25 закрито — тоді видалити |
 
 ## Стенди й інструменти

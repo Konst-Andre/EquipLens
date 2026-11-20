@@ -27,6 +27,12 @@ if (process.argv.includes('--page-only')) { console.log('сторінка:', pag
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto('file://' + pagePath); await p.waitForTimeout(800);
   await p.evaluate(() => document.getElementById('zOne').click()); await p.waitForTimeout(300);   // масштаб 1:1 — скло судиться лише на 1:1 (wsd 2.14)
+  /* панель примірки не з'їдає екран телефона: ≤ 140 px (пропуск Konst S40 — пояснення абзацом займало верх екрана; тепер за «i»).
+     Зуб: --inject-panel розкриває пояснення → ✗ мусить з'явитись. */
+  if (process.argv.includes('--inject-panel')) await p.evaluate(() => { document.querySelector('#fit .fs').hidden = false; });
+  const barH = await p.evaluate(() => document.getElementById('fit').offsetHeight);
+  if (barH > 140) errs.push(`панель примірки ${barH} px > 140 — пояснення має жити за «i», не абзацом`);
+  console.log('панель примірки:', barH, 'px (≤ 140)');
   const V = await p.evaluate(() => Object.fromEntries(Object.entries(FIT.V).map(([t, a]) => [t, a.map(v => v.id)])));
   const shots = [];
   for (const theme of ['light', 'dark']) for (const id of V[theme]) {
