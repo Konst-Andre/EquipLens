@@ -10,7 +10,7 @@
 - **Старт сесії:** рядки ⚠ / ✗ `env_check` кладе диспетчер ядра (нема — `bash tools/env_check.sh` руками) → `REPO_LAYOUT.md` → найновіше самері в `sessions/` (§0) → `lens/EquipLens_CHERGA.md` цілком → точково `lens/EquipLens_MASTER_LOCK.md` · `lens/EquipLens_Z_REGISTR.md`.
 - **Гілка:** робота — на гілці `claude/…`; `main` — лише з «так» Konst: **кожен коміт у `main` = деплой GitHub Pages** (публікується корінь репо, разом зі службовим). Push відхилено — `git pull --rebase`, ніколи force.
 - **Пристрій приймання:** телефон (стенд і майбутня PWA). Браузер звужує, телефон вирішує.
-- **Дизайн-основа:** токенів окремим файлом ще нема — джерело значень зараз стенд: об'єкт `S` (важелі) і засів `LOCK_SEED` у `tools/EquipLens_headbench_v*.html`; у канон (окремий файл lens/EquipLens_head_valuesLOCK.md — рішення (а) 19.11.2026; створить `BUILD-1` Ф1) вони переходять лише в момент порту в білд (ПОРТ-ЧИСЕЛ — `lens/BUILD-1_brief.md` §2). Друга поверхня — нема. Іменний простір стенда: `nav*` — коробка острівця, `nv*` — вміст кнопки (S35 §1).
+- **Дизайн-основа:** токенів окремим файлом ще нема — джерело значень зараз стенд: об'єкт `S` (важелі) і засів `LOCK_SEED` у `tools/EquipLens_headbench_v*.html`; у канон (окремий файл «lens/EquipLens_head_valuesLOCK.md» — рішення (а) 19.11.2026; створить `BUILD-1` Ф1) вони переходять лише в момент порту в білд (ПОРТ-ЧИСЕЛ — `lens/BUILD-1_brief.md` §2). Друга поверхня — нема. Іменний простір стенда: `nav*` — коробка острівця, `nv*` — вміст кнопки (S35 §1).
 
 ## Де що живе і як потрапляє в прод
 
@@ -20,15 +20,15 @@
 |---|---|---|
 | сайт | корінь: `index.html` · `data/` · `media/` | GitHub Pages з кореня `main` — коміт у `main` |
 | стенд, смоук, прилади | `tools/` | не призначені для публікації, але Pages їх віддає (перехідний стан Р-7) |
-| канон, самері, архів | `lens/` · `sessions/` · `archive/` | те саме |
+| канон, самері, архів, оригінали, `*.md` кореня | `lens/` · `sessions/` · `archive/` · `sources/` | те саме |
 
 Переїзд сайту в `docs/` (Р-7) — лише після того, як Konst перемкне джерело Pages; окремим ходом, з пробою «до/після».
 
 ## Гейти перед комітом
 
-`bash tools/env_check.sh` — exit 0; `ENV_INJECT=1 bash tools/env_check.sh` — ✗ прод і «ЗЛОВИВ» смоука й інвентаря (зуби). Усередині: гейт продукту `Lens_validate.py --product .`, `--html` живого стенда, смоук `tools/smoke_v*.js` (чистий і `--inject`), інвентар стенда `tools/stand_inventory.py`, прилади ядра. Правив стенд — смоук обома режимами до коміту. Числа ✓ — у виводі приладу; нормативи стенда — у шапці стенда й останньому самері, не тут. Інструменти (jsdom) ставить `.claude/hooks/session-start.sh`; змінив гейт — правиш хук і `env_check` тим самим комітом.
+`bash tools/env_check.sh` — exit 0; `ENV_INJECT=1 bash tools/env_check.sh` — ✗ прод і «ЗЛОВИВ» смоука й інвентаря (зуби). Усередині: гейт продукту `Lens_validate.py --product .`, `--html` живого стенда, смоук `tools/smoke_v*.js` (чистий і `--inject`), інвентар стенда `tools/stand_inventory.py`, прилади ядра. Правив стенд — смоук обома режимами до коміту. Числа ✓ — у виводі приладу; нормативи стенда — у шапці стенда й останньому самері, не тут. Інструменти (jsdom) ставить `.claude/hooks/session-start.sh` — лише в хмарній сесії (`CLAUDE_CODE_REMOTE=true`; локально — `npm install --prefix ~/.deps jsdom` руками); змінив гейт — правиш хук і `env_check` тим самим комітом.
 
-Прилади ядра запускаються з клону `/tmp/lens-governance`; у режимі Auto їх пропускають вузькі правила дозволу `.claude/settings.json` («так» Konst 19.11.2026). Нова команда приладу ядра — нове вузьке правило там же (широкі `Bash(python3 *)` Auto відкидає).
+Прилади ядра запускаються з клону ядра: `../lens-governance`, нема — `/tmp/lens-governance` (`tools/env_check.sh`, рядок `K=`). У режимі Auto їх пропускають вузькі правила дозволу `.claude/settings.json` («так» Konst 19.11.2026) — коли робоча тека сесії — цей репо (корінь з кількох репо цей файл не вантажить). Нова команда приладу ядра — нове вузьке правило там же; широкі правила з інтерпретатором (`Bash(python*)`) Auto відкидає (code.claude.com/docs/en/permission-modes, 20.11.2026).
 
 ## Секрети
 
@@ -38,4 +38,4 @@
 
 - Самері — `sessions/EquipLens_session_summary_S<N>_<ТЕМА>.md`, живих рівно 2 (`sessions/README.md`); витіснене — `git mv` в `archive/summaries/` і рядок в INDEX.
 - Черга — `lens/EquipLens_CHERGA.md` (свій словник станів у шапці). Журнал аудиту правил — `lens/EquipLens_AUDIT.md`.
-- Вироки продукту — у `lens/EquipLens_MASTER_LOCK.md` (значення стенда — не сюди, а в lens/EquipLens_head_valuesLOCK.md на порті, `lens/BUILD-1_brief.md` Ф1); З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
+- Вироки продукту — у `lens/EquipLens_MASTER_LOCK.md` (значення стенда — не сюди, а в «lens/EquipLens_head_valuesLOCK.md» на порті, `lens/BUILD-1_brief.md` Ф1); З-номери — адреси в `lens/EquipLens_Z_REGISTR.md`, повний текст там, куди адреса веде.
