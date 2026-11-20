@@ -7,9 +7,12 @@
      3. чи бреше рядок «CSS-СЕКЦІЯ НЕ ПОКРИВАЄ».
    Керування — КЛІКОМ по реальних кнопках, не присвоєнням S: інакше судимо
    не той шлях, яким ходить оператор (пікер існує в розмітці ≠ pick() його знає).
-   Запуск: node EquipLens_K0_passport_audit.js   (поруч EquipLens_headbench_v17.html) */
+   Запуск: node EquipLens_K0_passport_audit.js [стенд]   (без аргументу — живий стенд поруч: найбільший номер; S36 — було зашите ім'я v17, якого вже нема) */
 const {JSDOM} = require('jsdom'), fs = require('fs');
-const html = fs.readFileSync('EquipLens_headbench_v17.html', 'utf8');
+const live = process.argv[2] || fs.readdirSync('.').filter(f => /^EquipLens_headbench_v[\d_]+\.html$/.test(f))
+  .sort((a, b) => a.localeCompare(b, 'en', {numeric: true})).pop();
+console.log('стенд:', live);
+const html = fs.readFileSync(live, 'utf8');
 
 const dom = new JSDOM(html, {runScripts:'dangerously', pretendToBeVisual:true,
   url:'https://konst-andre.github.io/',
