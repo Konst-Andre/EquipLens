@@ -68,7 +68,7 @@ css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8
 #fit button{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 #fit button[aria-pressed=true]{background:#3a5bd9;color:#fff;border-color:#3a5bd9}
 #fit .fs{opacity:.75;font-size:11.5px}
-#meter,#fab.bx-fab{display:none!important}   /* службове стенда — не частина екрана */
+#meter,#fab.bx-fab,.bx-bar{display:none!important}   /* службове стенда — не частина екрана; .bx-bar — свій перемикач теми стенда, не синхронізований з панеллю примірки (огляд прев'ю v1, S40) */
 body{padding-top:var(--fitH,120px)!important}`;
 document.head.appendChild(css);
 const bar = document.createElement('div'); bar.id = 'fit';

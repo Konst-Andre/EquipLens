@@ -9,7 +9,11 @@ const stand = fs.readFileSync(path.join(ROOT, 'tools/EquipLens_headbench_v17_30.
 const fit = fs.readFileSync(path.join(__dirname, 'fit_bg.js'), 'utf8');
 const i = stand.lastIndexOf('</body>');
 if (i < 0) throw new Error('стенд без </body>');
-const page = stand.slice(0, i) + '<script>\n' + fit + '\n</script>\n' + stand.slice(i);
+/* синтетичні дані й у ТЕКСТІ сторінки, не лише на екрані: прев'ю публічне (lens-governance:tools/PREVIEW.md §3 п.8) */
+let k = 0;
+const synth = stand.slice(0, i).replace(/\{n:'[^']*',(\s*)a:'[^']*',(\s*)c:'[^']*'/g, (m, s1, s2) => { k++; return `{n:'Аптека ${k}',${s1}a:'вул. Тестова, ${k*7-4}',${s2}c:'${k % 2 ? 'Місто А' : 'Місто Б'}'`; });
+if (!k) throw new Error('дані стенда не знайдено — синтетична підміна не спрацювала');
+const page = synth + '<script>\n' + fit + '\n</script>\n' + stand.slice(i);
 fs.mkdirSync(out, {recursive: true});
 const pagePath = path.join(out, 'DES-1_bg.html');
 fs.writeFileSync(pagePath, page);
@@ -22,7 +26,7 @@ if (process.argv.includes('--page-only')) { console.log('сторінка:', pag
   const p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto('file://' + pagePath); await p.waitForTimeout(800);
-  await p.click('#zOne'); await p.waitForTimeout(300);   // масштаб 1:1 — скло судиться лише на 1:1 (wsd 2.14)
+  await p.evaluate(() => document.getElementById('zOne').click()); await p.waitForTimeout(300);   // масштаб 1:1 — скло судиться лише на 1:1 (wsd 2.14)
   const V = await p.evaluate(() => Object.fromEntries(Object.entries(FIT.V).map(([t, a]) => [t, a.map(v => v.id)])));
   const shots = [];
   for (const theme of ['light', 'dark']) for (const id of V[theme]) {
