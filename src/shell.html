@@ -5,6 +5,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EquipLens</title>
+<!-- оболонка PWA (BUILD-1 Ф2-2б; кукбук A1 · A2 · A55 · A75): маніфест — окремий файл (у data: нема базового URL); іконки й
+     кольори згенеровано tools/brand.py зі стенда; мітку {{v:…}} збірка замінює на «шлях?v=<хеш файла>» -->
+<link rel="manifest" href="{{v:manifest.webmanifest}}">
+<link rel="apple-touch-icon" href="{{v:icons/apple-touch-icon.png}}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{v:icons/favicon-32.png}}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EquipLens">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#EFEFF3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F0E10">
 <style>
 @layer reset, tokens, base, components, utilities;
 <!--@src css/reset.css-->

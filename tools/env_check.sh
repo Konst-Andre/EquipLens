@@ -84,15 +84,17 @@ else case "$iv" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 # кожен ключ засіву має рядок; нові вироки — ⓘ). Обидва з зубами --inject
 # + збірка (BUILD-1 Ф2-1): docs/index.html ≡ зібраному з src/ і valuesLOCK
 # + шрифт (Ф2-2а): src/fonts/manrope.woff2 — вісь, версія, бюджет, кожен символ тексту src/ (fonttools — хук старту)
-for vc in "build.py values --check" "stand_inventory.py --values --check" "build.py build --check" "fonts.py --check"; do
+# + знак (Ф2-2б): гліф іконок ≡ стенду (Chromium), PNG розмір · непрозорість · печатка, маніфест, meta оболонки, safe-area
+for vc in "build.py values --check" "stand_inventory.py --values --check" "build.py build --check" "fonts.py --check" "brand.py --check"; do
   vl=$(python3 tools/$vc ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "${vc#* } · ${vc%% *}${ENV_INJECT:+ --inject}: $vl"
   if [ -n "${ENV_INJECT:-}" ]; then case "$vl" in ЗЛОВИВ) ;; *) echo "✗ valuesLOCK · ${vc%% *} --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
   else case "$vl" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 done
 
-# білд у браузері (Ф2-2а): Chromium без мережі, обидві теми — 0 помилок JS і Manrope справді малює (канарка ширини)
+# білд у браузері (Ф2-2а · Ф2-2б): Chromium без мережі, обидві теми — 0 помилок JS і Manrope справді малює (канарка ширини);
+# оболонка PWA з локального сервера — маніфест розбирається, кожна іконка вантажиться й має заявлений розмір
 bs=$(timeout 180 node tools/build_smoke.js ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "білд у браузері${ENV_INJECT:+ --inject}: $bs"
-if [ -n "${ENV_INJECT:-}" ]; then case "$bs" in ЗЛОВИВ) ;; *) echo "✗ build_smoke --inject не зловив зіпсований шрифт — гейт без зубів"; fail=1;; esac
+if [ -n "${ENV_INJECT:-}" ]; then case "$bs" in ЗЛОВИВ) ;; *) echo "✗ build_smoke --inject не зловив зіпсований шрифт чи биті іконки — гейт без зубів"; fail=1;; esac
 else case "$bs" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 
 # Спільні інструменти ядра — з КЛОНУ ядра поруч ($K, як профіль вище): виклик, не копія. Клон кладе setup script v3 середовища; нема клону — рядки «ядра поруч нема»: налаштувати середовище, не обходити curl-ом

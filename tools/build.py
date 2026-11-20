@@ -22,9 +22,12 @@
   python3 tools/build.py build --check     — зібране в пам'яті ≡ закоміченому docs/index.html (і відсутній файл,
                                              і мітка без файла) → ✗; з --inject — змінює джерело в пам'яті → «ЗЛОВИВ»
   мітка /*@font fonts/x.woff2*/ у CSS (Ф2-2а) — url(data:font/woff2;base64,…): шрифт вшито, SW кешує один файл
-Лише stdlib. Наступні частини — BUILD-1 §4-в: Ф2-2б маніфест й іконки · Ф2-3 токени.
+  мітка {{v:шлях}} в оболонці й маніфесті (Ф2-2б) — файл src/шлях копіюється в docs/шлях, мітка → «шлях?v=<8 знаків sha256
+                                             файла>» (кеш Pages max-age=600 — wsd 6.5; хеш замість ручної версії в 5 місцях, A4);
+                                             у маніфесті мітки розкриваються теж; файл у docs/ без мітки → ✗ у --check (зайвий)
+Лише stdlib. Наступна частина — BUILD-1 §4-в: Ф2-3 токени.
 """
-import base64, json, os, re, sys
+import base64, hashlib, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VALUES = os.path.join(ROOT, 'lens', 'EquipLens_head_valuesLOCK.md')
@@ -120,8 +123,10 @@ def cmd_values(argv):
 
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'docs', 'index.html')
+DOCS = os.path.dirname(OUT)
 MARK = re.compile(r'<!--@src ([\w./-]+)-->')
 FONT = re.compile(r'/\*@font ([\w./-]+\.woff2)\*/')   # Ф2-2а: шрифт тексту base64-ом (tools/fonts.py)
+VTOK = re.compile(r'\{\{v:([\w./-]+)\}\}')   # Ф2-2б: файл поруч з index.html + ?v=хеш (tools/brand.py)
 ESC = {'<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029'}
 
 
@@ -158,24 +163,49 @@ def build_text(override=None):
     if html.count('<!--@values-->') != 1:
         errs.append(f'мітка <!--@values--> має бути рівно одна (є {html.count("<!--@values-->")})')
     html = html.replace('<!--@values-->', f'<script type="application/json" id="values">{js}</script>')
-    return html, parts, errs
+    files = {}
+
+    def ver(m):
+        rel = m.group(1)
+        p = os.path.join(SRC, rel)
+        if not os.path.isfile(p):
+            errs.append(f'мітка {{{{v:{rel}}}}} без файла src/{rel}')
+            return m.group(0)
+        data = open(p, 'rb').read()
+        if rel.endswith('.webmanifest'):
+            data = VTOK.sub(ver, data.decode('utf-8')).encode('utf-8')
+        files[rel] = data
+        parts.append((rel, len(data)))
+        return f'{rel}?v={hashlib.sha256(data).hexdigest()[:8]}'
+    html = VTOK.sub(ver, html)
+    return html, parts, errs, files
 
 
 def cmd_build(argv):
     check, inject = '--check' in argv, '--inject' in argv
     over = {'js/main.js': open(os.path.join(SRC, 'js', 'main.js'), encoding='utf-8').read() + '\n// zzInj\n'} if inject else None
-    html, parts, errs = build_text(over)
+    html, parts, errs, files = build_text(over)
     rel = os.path.relpath(OUT, ROOT)
     print(f'збірка · src/ → {rel}' + (' · --check' if check else '') + (' · --inject' if inject else ''))
     if not check and not inject and not errs:
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
         open(OUT, 'w', encoding='utf-8').write(html)
-        print(f'  записано {rel}')
+        for f, data in files.items():
+            os.makedirs(os.path.dirname(os.path.join(DOCS, f)), exist_ok=True)
+            open(os.path.join(DOCS, f), 'wb').write(data)
+        print(f'  записано {rel}' + (f' і {len(files)} файлів поруч' if files else ''))
     elif not errs:
         if not os.path.exists(OUT):
             errs.append(f'нема {rel} — збери: build')
         elif open(OUT, encoding='utf-8').read() != html:
             errs.append(f'{rel} ≠ зібраному з src/ і valuesLOCK — правили зібране руками чи не перезібрали: build')
+        for f, data in files.items():
+            p = os.path.join(DOCS, f)
+            if not os.path.isfile(p) or open(p, 'rb').read() != data:
+                errs.append(f'docs/{f} ≠ src/{f} (чи нема) — перезбери: build')
+        have = {os.path.relpath(os.path.join(d, x), DOCS) for d, _, fs in os.walk(DOCS) for x in fs}
+        for f in sorted(have - set(files) - {'index.html'}):
+            errs.append(f'docs/{f} — зайвий: жодна мітка {{{{v:…}}}} на нього не веде (видали або дай мітку)')
     print('  розмір: ' + ' · '.join(f'{n} {b}' for n, b in parts) + f' · усього {len(html.encode("utf-8"))} Б')
     for e in errs:
         print('  ✗ ' + e)
