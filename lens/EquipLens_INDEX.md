@@ -28,10 +28,10 @@
 
 | файл | що |
 |---|---|
-| `sessions/EquipLens_session_summary_S38_FONTS.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): Ф2-2 шрифти й маніфест, ліцензія Chillax прочитана |
-| `sessions/EquipLens_session_summary_S37_TOOLS_HOST.md` | попереднє: прилади як в AE, воркер, стенд очима, Ф1–Ф2-1 |
+| `sessions/EquipLens_session_summary_S39_TOKENS.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): Ф2-3 токени, детектор «токени ≡ стенду» |
+| `sessions/EquipLens_session_summary_S38_FONTS.md` | попереднє: Ф2-2 шрифти й маніфест, ліцензія Chillax прочитана |
 
-Витіснені — `archive/summaries/` (S1…S36; S35 — останнє по стенду, засів `LOCK_SEED` §1).
+Витіснені — `archive/summaries/` (S1…S37; S35 — останнє по стенду, засів `LOCK_SEED` §1).
 
 ## Канон
 
