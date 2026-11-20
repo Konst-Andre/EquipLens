@@ -1,6 +1,6 @@
 /* живе доки: живе застосунок · токени (BUILD-1 Ф2-3, S39). Порт функцій категорії T замороженого стенда 1:1 —
    tools/EquipLens_headbench_v17_30.html: hx · rh · mixHex (:1993–1995) · hsl (:2000) · AUR (:2392) · aurLayers (:2405) ·
-   гілка «ґрунт» applyVars (:2860–2902); рядки скопійовано,
+   гілка «ґрунт» applyVars (:2860–2902) · hexA (:2004) · картка applyVars (:2569–2610); рядки скопійовано,
    не переписано (BUILD-1 §4-в «JS — простими файлами в одному просторі»). Стоїть у <head> синхронно — до першого кадру
    (синхронний скрипт у head блокує рендер; dev.to 137foundry «flash of wrong theme», 20.11.2026).
    Значення — JSON-блок #values (джерело — lens/EquipLens_head_valuesLOCK.md); `S` — ім'я стану в стенді, тут той самий об'єкт.
@@ -10,6 +10,7 @@ const hx = h => { const n = parseInt(h.slice(1),16); return [n>>16&255,n>>8&255,
 const rh = a => '#' + a.map(v => Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
 const mixHex = (a,b,t) => rh(hx(a).map((v,i) => v + (hx(b)[i]-v)*t));
 const hsl = (h,s,l,a) => a==null ? `hsl(${h} ${s}% ${l}%)` : `hsl(${h} ${s}% ${l}% / ${a})`;
+const hexA = (h,a) => { const c = hx(h); return `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(3)})`; };
 const AUR = {
   all:    [[20,40, 90, 80,55],[80,65, 85, 75,50],[50,20, 95, 85,50]],
   chrome: [[50,97, 95, 30,42],[85,88, 90, 28,34],[50, 3, 95, 26,30]],
@@ -98,6 +99,39 @@ function applyTokens(){
   }
   const aur = aurLayers(dark);
   if (aur) s.setProperty('--bg-aur', aur); else s.removeProperty('--bg-aur');
+  /* К22-а · картка — стенд :2569–2610 рядками (коментарі стенда скорочено до суті; повні — у стенді) */
+  s.setProperty('--cdGap',  S.cdGap+'px');
+  s.setProperty('--cdR',    S.cdR+'px');
+  s.setProperty('--cdPadX', S.cdPadX+'px');
+  s.setProperty('--cdRimW', (S.cdRimW/10).toFixed(1)+'px');
+  s.setProperty('--cdBevW', (S.cdBevW/10).toFixed(1)+'px');
+  s.setProperty('--cdBody', dark ? hsl(S.dkH,S.dkC*0.92,S.dkL+S.dkS,(S.cdAD/100).toFixed(3))
+                                 : hexA('#FFFFFF',S.cdAL/100));
+  /* К22-б · фарба краю: полярність — фізика, важіль дає силу; --cdSh на темній — 'none' безумовно (A45);
+     --cdGlass = 'none' при cdBlur=0 — blur(0px) усе одно заводить шар */
+  const cdInk='#12121C', cdLit='#FFFFFF', cdShd='#101018';
+  s.setProperty('--cdRimC', dark ? hexA(cdLit,S.cdRimAD/100) : hexA(cdInk,S.cdRimAL/100));
+  s.setProperty('--cdBevT', dark ? hexA(cdLit,S.cdBevTD/100) : hexA(cdLit,S.cdBevTL/100));
+  s.setProperty('--cdBevB', dark ? hexA(cdInk,S.cdBevBD/100) : hexA(cdInk,S.cdBevBL/100));
+  s.setProperty('--cdBevS', dark ? hexA(cdLit,S.cdBevSD/100) : hexA(cdInk,S.cdBevSL/100));
+  s.setProperty('--cdSh',   dark ? 'none'
+    : '0 '+S.cdShY+'px '+S.cdShB+'px '+hexA(cdShd,S.cdShA/100));
+  s.setProperty('--cdGlass', S.cdBlur>0 ? 'blur('+S.cdBlur+'px) saturate('+S.cdSat+'%)' : 'none');
+  /* К22-в · glift і ridge: друга зупинка — альфа 0, НІКОЛИ transparent (sRGB тягне середину в сірий);
+     альфа 0 → 'none' (шар з нульовою альфою все одно заводить композит); на світлій — 'none' (A45) */
+  s.setProperty('--cdRidge', (dark && S.cdRdgAD>0)
+    ? 'linear-gradient(180deg,'
+      + hexA(cdLit,S.cdRdgAD/100) + ' 0,'
+      + hexA(cdLit,0) + ' ' + S.cdRdgH + 'px)'
+    : 'none');
+  const cdGliftL = S.dkL + S.dkS + S.cdGliftD;
+  s.setProperty('--cdGlift', (dark && S.cdGliftAD>0)
+    ? 'linear-gradient(180deg,'
+      + hsl(S.dkH,S.dkC*0.92,cdGliftL,(S.cdGliftAD/100).toFixed(3)) + ' 0%,'
+      + hsl(S.dkH,S.dkC*0.92,cdGliftL,0) + ' ' + S.cdGliftHD + '%)'
+    : 'none');
+  s.setProperty('--aSize', S.aSize+'px'); s.setProperty('--mtSize', S.mtSize+'px');
+  s.setProperty('--rowPadY', S.rowPadY+'px'); s.setProperty('--headGap', S.headGap+'px');
   const a = dark ? [S.aH, S.aS, S.aL] : [S.aHL, S.aSL, S.aLL];
   s.setProperty('--gang', S.gAng+'deg');
   s.setProperty('--g1', hsl(a[0], a[1], a[2]));
