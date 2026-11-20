@@ -43,7 +43,6 @@
 | `lens/EquipLens_AUDIT.md` | журнал аудиту інструкцій (`CLAUDE.md` тощо); формула — у ядрі |
 | `lens/shots/README.md` | примірка UI-рішень наперед — стан кожної (`SHOTS.md` ядра) |
 | `lens/evidence/DES-1_swipe/konst_dark_list.webp` · `lens/evidence/DES-1_swipe/konst_dark_open_corners.webp` · `lens/evidence/DES-1_swipe/konst_light_closing_blink.webp` · `lens/evidence/DES-1_swipe/konst_light_open_corners.webp` · `lens/evidence/DES-1_swipe/machine_close_frames_both_themes.webp` | докази бага свайпу картки (`DES-1` п.25): знімки iPhone Konst 20.11.2026 (`konst_*`, стенд, синтетичні дані) + плівка машини (відкрито → закриття кожні 25 мс; верх світла, низ темна). Живе доки: п.25 закрито — тоді видалити |
-| `lens/EquipLens_S17_STARTPOINTS_and_QUEUE_v7.md` | супутник (105 KB, жодного разу не ревізований — аудит `Г-11` черги ядра) |
 
 ## Стенди й інструменти
 
