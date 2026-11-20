@@ -28,10 +28,10 @@
 
 | файл | що |
 |---|---|
-| `sessions/EquipLens_session_summary_S39_TOKENS.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): Ф2-3 токени, детектор «токени ≡ стенду» |
-| `sessions/EquipLens_session_summary_S38_FONTS.md` | попереднє: Ф2-2 шрифти й маніфест, ліцензія Chillax прочитана |
+| `sessions/EquipLens_session_summary_S40_BG.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): примірка фону обох тем, розвідка скла (GlassKit «крапля», lgcl) |
+| `sessions/EquipLens_session_summary_S39_TOKENS.md` | попереднє: Ф2-3 токени, детектор «токени ≡ стенду» |
 
-Витіснені — `archive/summaries/` (S1…S37; S35 — останнє по стенду, засів `LOCK_SEED` §1).
+Витіснені — `archive/summaries/` (S1…S38; S35 — останнє по стенду, засів `LOCK_SEED` §1).
 
 ## Канон
 
