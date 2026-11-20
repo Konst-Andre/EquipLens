@@ -15,6 +15,6 @@ PWV=$(python3 -c "import json;print(json.load(open('/opt/node-tools/node_modules
 [ -n "$PWV" ] && { python3 -c "import importlib.metadata as m,sys; sys.exit(m.version('playwright')!='$PWV')" 2>/dev/null || pip install -q "playwright==$PWV" >/dev/null 2>&1 || true; }
 # шрифт білда (BUILD-1 Ф2-2а): tools/fonts.py build і --check — fonttools + brotli (woff2)
 python3 -c "import fontTools, brotli" 2>/dev/null || pip install -q fonttools brotli >/dev/null 2>&1 || pip install -q --break-system-packages fonttools brotli >/dev/null 2>&1 || true
-# знак (BUILD-1 Ф2-2б): tools/brand.py icons — Pillow (PNG з печаткою); wordmark — uharfbuzz (розстановка ≡ Chromium). --check — лише playwright-python
+# знак (BUILD-1 Ф2-2б): іконки — pwa_icon.py ядра (tools/icon.json) — Pillow (PNG з печаткою); tools/brand.py wordmark — uharfbuzz (розстановка ≡ Chromium). --check — лише playwright-python
 python3 -c "import PIL, uharfbuzz" 2>/dev/null || pip install -q pillow uharfbuzz >/dev/null 2>&1 || pip install -q --break-system-packages pillow uharfbuzz >/dev/null 2>&1 || true
 echo "session-start: playwright-python ${PWV:-—} · jsdom ($HOME/.deps) · NODE_PATH · fonttools · pillow · uharfbuzz"

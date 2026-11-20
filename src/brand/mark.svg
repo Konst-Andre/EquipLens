@@ -1,3 +1,3 @@
-<!-- живе доки: живе знак EquipLens · згенеровано tools/brand.py icons зі стенда v17_30 (гліф Н5); руками не правити -->
+<!-- живе доки: живе знак EquipLens · згенеровано lens-governance:tools/claude-code/pwa_icon.py icons зі сторінки EquipLens_headbench_v17_30.html (гліф Н5); руками не правити -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="elGrad" x1="0" y1="0" x2="1" y2="1">
          <stop stop-color="var(--g1)"></stop><stop offset="1" stop-color="var(--g2)"></stop></linearGradient></defs><path d="M5.6 15.60V5.20Q5.6 3 7.80 3H14.10L18.4 7.30V15.60"></path><path d="M14.10 3v4.30h4.30"></path><path d="M8.40 8.60h3.60"></path><path d="M8.40 11.80h5.76"></path><path d="M8.40 15.00h7.20"></path><path class="el-tray" data-p="grad" d="M4.40 17.80V18.60Q4.40 21 6.80 21H17.20Q19.60 21 19.60 18.60V17.80"></path></svg>

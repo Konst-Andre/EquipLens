@@ -84,12 +84,20 @@ else case "$iv" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 # кожен ключ засіву має рядок; нові вироки — ⓘ). Обидва з зубами --inject
 # + збірка (BUILD-1 Ф2-1): docs/index.html ≡ зібраному з src/ і valuesLOCK
 # + шрифт (Ф2-2а): src/fonts/manrope.woff2 — вісь, версія, бюджет, кожен символ тексту src/ (fonttools — хук старту)
-# + знак (Ф2-2б): гліф іконок ≡ стенду (Chromium), PNG розмір · непрозорість · печатка, маніфест, meta оболонки, safe-area
+# + знак-напис (Ф2-2б): шапка src/brand/wordmark.svg ≡ valuesLOCK (іконки — прилад ядра pwa_icon.py нижче)
 for vc in "build.py values --check" "stand_inventory.py --values --check" "build.py build --check" "fonts.py --check" "brand.py --check"; do
   vl=$(python3 tools/$vc ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "${vc#* } · ${vc%% *}${ENV_INJECT:+ --inject}: $vl"
   if [ -n "${ENV_INJECT:-}" ]; then case "$vl" in ЗЛОВИВ) ;; *) echo "✗ valuesLOCK · ${vc%% *} --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
   else case "$vl" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 done
+
+# іконки PWA (Ф2-2б; прилад ядра з ICON-1, конфіг tools/icon.json): гліф ≡ стенду (Chromium), PNG розмір · непрозорість · печатка,
+# маніфест, meta оболонки, safe-area — з зубами --inject (4 підкидання). Нема клону ядра — ✗: іконки без перевірки не їдуть
+if [ -f "$K/tools/claude-code/pwa_icon.py" ]; then
+  pi=$(python3 "$K/tools/claude-code/pwa_icon.py" --check tools/icon.json ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "іконки PWA · pwa_icon ядра${ENV_INJECT:+ --inject}: $pi"
+  if [ -n "${ENV_INJECT:-}" ]; then case "$pi" in ЗЛОВИВ) ;; *) echo "✗ pwa_icon --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
+  else case "$pi" in *"✓ ───"*) ;; *) fail=1;; esac; fi
+else echo "✗ іконки PWA: нема $K/tools/claude-code/pwa_icon.py (клон ядра поруч) — перевірку не зроблено"; fail=1; fi
 
 # білд у браузері (Ф2-2а · Ф2-2б): Chromium без мережі, обидві теми — 0 помилок JS і Manrope справді малює (канарка ширини);
 # оболонка PWA з локального сервера — маніфест розбирається, кожна іконка вантажиться й має заявлений розмір

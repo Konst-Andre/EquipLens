@@ -1,0 +1,17 @@
+{
+  "name": "EquipLens",
+  "root": "..",
+  "stand": "tools/EquipLens_headbench_v17_30.html",
+  "glyph": "#sbox .el-brand .el-mk svg",
+  "frame": "#sbox",
+  "ink_from": ".el-mk",
+  "theme_js": "themeMode = THEME; render();",
+  "vars": {"g1": "--g1", "g2": "--g2", "canvas": "--canvas"},
+  "layers": {"body": [0], "rim": [1], "accent": [-1]},
+  "glyph_name": "гліф Н5",
+  "style": "aurora-dark",
+  "stroke": 1.5,
+  "seal": "equiplens-src",
+  "template": "\\{\\{v:([\\w./-]+)\\}\\}",
+  "out": {"brand": "src/brand", "icons": "src/icons", "manifest": "src/manifest.webmanifest", "shell": "src/shell.html", "css": "src/css/base.css"}
+}

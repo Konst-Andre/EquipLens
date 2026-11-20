@@ -1,7 +1,14 @@
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh" } ] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
     ]
   },
   "permissions": {
@@ -11,7 +18,9 @@
       "Bash(bash /tmp/lens-governance/tools/claude-code/frame_check.sh .)",
       "Bash(python3 /tmp/lens-governance/kernel/Lens_validate.py --product .)",
       "Bash(python3 /tmp/lens-governance/kernel/Lens_validate.py --html *)",
-      "Bash(python3 /tmp/lens-governance/tools/claude-code/hooks/ctx_watch.py marker *)"
+      "Bash(python3 /tmp/lens-governance/tools/claude-code/hooks/ctx_watch.py marker *)",
+      "Bash(python3 ../lens-governance/tools/claude-code/pwa_icon.py *)",
+      "Bash(python3 /tmp/lens-governance/tools/claude-code/pwa_icon.py *)"
     ]
   }
 }
