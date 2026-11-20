@@ -5,8 +5,7 @@
 @layer tokens {
 /* палітра (S39) — константи .screenbox[data-theme] стенда (:232–262) рядками; темна — заглушки, бойові пише js/tokens.js.
    Не перенесено — поза продуктом (класифікатор tools/build_smoke.js): --accent-soft (без споживача) · --ridge (без
-   споживача) · --r-card (лише рядок «row»/«slit») · --well (лише mat «well»). --well-bg — окремо: її валь wMix
-   valuesLOCK §2 мітить мертвим, а споживачі-стани є (.el-sw-ask .no) — 💡 S39 */
+   споживача) · --r-card (лише рядок «row»/«slit») · --well (лише mat «well»). --well-bg — з S39 (валь wMix — «живий без вироку»). */
 :root{--canvas:#EFEFF3;color-scheme:light;
   --surface:#FFFFFF; --raised:#FFFFFF;
   --ink:#131318; --ink-2:#54545F; --ink-3:#8A8A96;
@@ -16,7 +15,7 @@
   --lift:0 1px 1px rgba(16,16,24,.05),0 5px 14px rgba(16,16,24,.07);
   --lift-s:0 1px 2px rgba(16,16,24,.07);
   --glass:rgba(255,255,255,.80); --glass-rim:rgba(18,18,28,.09);
-  --r-ctl:10px}
+  --r-ctl:10px; --well-bg:#F4F4F7}
 @media (prefers-color-scheme: dark){:root{--canvas:#08080B;color-scheme:dark;
   --surface:#17171E; --raised:#242430;
   --ink:#F0F0F5; --ink-2:#A3A3AB; --ink-3:#71717A;
@@ -26,5 +25,5 @@
   --lift:0 0 0 1px rgba(255,255,255,.055);
   --lift-s:0 0 0 1px rgba(255,255,255,.05);
   --glass:rgba(23,23,30,.80); --glass-rim:rgba(255,255,255,.11);
-  --r-ctl:10px}}
+  --r-ctl:10px; --well-bg:#101016}}
 }

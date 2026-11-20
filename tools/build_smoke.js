@@ -29,7 +29,8 @@
 //                                          html{background:#010203 none;color-scheme:only light;--canvas:#010203;--zz-inject:1}
 //                                          → шрифт, оболонка, фон, color-scheme, чужа й хибна змінна мусять бути спіймані;
 //                                          джерело класифікатора без правил data-edge → відома відповідь ✗;
-//                                          з білда викинуто removeProperty світлої гілки → перемикання dark→light ✗ → «ЗЛОВИВ»
+//                                          з білда викинуто removeProperty світлої гілки → перемикання dark→light ✗;
+//                                          живий ключ dkH підкинуто в мертві §2 → «мертвий ключ живить продукт» ✗ → «ЗЛОВИВ»
 const fs = require('fs'), path = require('path'), http = require('http');
 // Playwright образу — /opt/node-tools (NODE_PATH хука старту веде на jsdom у ~/.deps, тож — запасний шлях)
 const { chromium } = (() => { try { return require('playwright'); } catch (e) { return require('/opt/node-tools/node_modules/playwright'); } })();
@@ -51,6 +52,20 @@ const RANK = ['без споживача', 'вимкнений варіант', 
 // (data-on="${i===chipIdx?1:0}") — ні: інакше «нічого не натиснуто» читалось би як вимкнений варіант (замір S39: --on-*)
 const variantAttrs = (src) => [...new Set([...src.matchAll(/dataset\.(\w+)\s*=\s*S\./g)].map(m => m[1].replace(/[A-Z]/g, c => '-' + c.toLowerCase()))
   .concat([...src.matchAll(/data-([\w-]+)="\$\{[^}]*\bS\./g)].map(m => m[1])))];
+// ключ S → змінні, які він живить (S39, підсилення wMix): з тексту applyVars стенда — S.ключ у виразі setProperty прямо
+// або через локальну const (const fa = … S.fabAD → --fab-bg). Наближення за текстом: ключ через функцію-помічника не видно.
+// Практика (20.11.2026): невикористані токени шукають за всіма формами посилань (designsystemproblems «unused token
+// detection»); аналіз однієї сторінки пропускає споживачів за дією (Project Wallace) — у нас це клас «стан».
+const keyVars = (src) => {
+  const i = src.indexOf('function applyVars(){'), body = src.slice(i, src.indexOf('\n}\n', i));
+  const st = body.replace(/\/\*[\s\S]*?\*\//g, '').split(/;\s*(?:\n|$)|;(?=\s*(?:s\.setProperty|const|let))/);
+  const cst = {}, out = {}, keys = e => new Set([...e.matchAll(/\bS\.(\w+)/g)].map(m => m[1]).concat(Object.keys(cst).filter(c => new RegExp('\\b' + c + '\\b').test(e)).flatMap(c => [...cst[c]])));
+  for (const x of st) {
+    for (const m of x.matchAll(/(?:const|let)\s+([\w\s,]+?)\s*=\s*([\s\S]*)/g)) { const ks = keys(m[2]);
+      for (const n of m[1].split(',').map(t => t.trim()).filter(Boolean)) cst[n] = ks; }
+    for (const m of x.matchAll(/setProperty\(\s*'(--[\w-]+)'\s*,([\s\S]*)/g)) for (const k of keys(m[2])) (out[k] = out[k] || new Set()).add(m[1]); }
+  return out;
+};
 // споживачі var() з тексту стенда: { var: [{ sel, def }] } — def = змінна-визначник (передає свій клас) або null
 const consumers = (src) => {
   const css = (src.match(/<style>([\s\S]*?)<\/style>/g) || []).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -79,11 +94,13 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
   if (inject) html = html.replace('</head>', '<style>html{background:#010203 none!important;color-scheme:only light!important;--canvas:#010203!important;--zz-inject:1}</style></head>');
   let src = fs.readFileSync(stand, 'utf8');
   if (inject) src = src.replace(/[^{}]*\[data-edge[^{}]*\{[^}]*\}/g, '');   // зуби класифікатора: правила краю аркуша зникли
-  const cons = consumers(src), va = variantAttrs(src);
+  const cons = consumers(src), va = variantAttrs(src), kv = keyVars(src);
+  if (!(kv.dkH && kv.dkH.has('--canvas'))) throw new Error('ключ → змінні: dkH не живить --canvas — розбір applyVars осліп');
   if (!['row', 'edge', 'onmat'].every(k => va.includes(k))) throw new Error(`атрибути варіантів стенда — ${va.join(' ')}: нема row · edge · onmat, ознака осліпла`);
   // другий канал — мертві ключі valuesLOCK §2 (рядки «мертві за засівом»), за іменем
   const deadKeys = fs.readFileSync(path.join(__dirname, '..', 'lens', 'EquipLens_head_valuesLOCK.md'), 'utf8').split('\n')
     .filter(l => l.startsWith('|') && l.includes('мертві за засівом')).flatMap(l => [...l.split('|')[1].matchAll(/`(\w+)`/g)].map(m => m[1]));
+  if (inject) deadKeys.push('dkH');   // зуби сторожа: живий ключ полотна, підкинутий у мертві, мусить дати ✗
   if (deadKeys.length < 20) throw new Error(`valuesLOCK §2 дав ${deadKeys.length} мертвих ключів < 20 — другий канал осліп`);
   const browser = await chromium.launch();
   const errs = [], standV = {};
@@ -157,6 +174,9 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
       errs.push(`${scheme}: класифікатор бреше — ${k} «${cls[k]}», а відома відповідь «${want}»`);
     for (const k of deadKeys.map(x => '--' + x).filter(x => x in cls && PRODUCT.includes(cls[x])))
       errs.push(`${scheme}: класифікатор ⟂ valuesLOCK §2 — ${k} мертвий за засівом, а за ознакою «${cls[k]}»`);
+    // мертвий ключ §2 не сміє живити змінну продукту (таблиця мертвих стенда судила лише свої стани — S39: wMix → --well-bg)
+    for (const k of deadKeys) { const live = [...(kv[k] || [])].filter(v => PRODUCT.includes(cls[v]));
+      if (live.length) errs.push(`${scheme}: ключ ${k} — valuesLOCK §2 «мертвий за засівом», а живить змінні продукту: ${live.join(' ')}`); }
     const prod = sk.filter(k => PRODUCT.includes(cls[k]));
     const alien = bk.filter(k => !(k in s.v)), wrong = bk.filter(k => k in s.v && b.v[k] !== s.v[k]), todo = prod.filter(k => !(k in b.v));
     for (const k of bk.filter(k => k in cls && !PRODUCT.includes(cls[k]))) errs.push(`${scheme}: змінна ${k} перенесена, а в стенді вона «${cls[k]}» — не продукт`);
@@ -229,9 +249,10 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
           cs = errs.some(e => e.startsWith('dark: color-scheme')),
           vr = errs.some(e => e.includes('змінна --canvas ≠')) && errs.some(e => e.includes('змінна --zz-inject')),
           kl = errs.some(e => e.includes('класифікатор бреше — --edgeX')),
-          sw = errs.some(e => e.startsWith('перемикання dark→light: змінна --surface'));
-    const ok = font && shell && bg && cs && vr && kl && sw;
-    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'} · фон ${bg ? '✓' : '✗'} · color-scheme ${cs ? '✓' : '✗'} · змінні ${vr ? '✓' : '✗'} · класифікатор ${kl ? '✓' : '✗'} · перемикання ${sw ? '✓' : '✗'}`);
+          sw = errs.some(e => e.startsWith('перемикання dark→light: змінна --surface')),
+          dk = errs.some(e => e.includes('ключ dkH — valuesLOCK §2'));
+    const ok = font && shell && bg && cs && vr && kl && sw && dk;
+    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'} · фон ${bg ? '✓' : '✗'} · color-scheme ${cs ? '✓' : '✗'} · змінні ${vr ? '✓' : '✗'} · класифікатор ${kl ? '✓' : '✗'} · перемикання ${sw ? '✓' : '✗'} · мертвий ключ ${dk ? '✓' : '✗'}`);
     process.exit(ok ? 1 : 0);
   }
   console.log(`─── білд у браузері: помилок ${errs.length} ` + (errs.length ? '✗ ───' : '✓ ───'));

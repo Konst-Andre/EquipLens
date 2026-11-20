@@ -68,8 +68,8 @@ function aurLayers(dark){
 /* Полотно і палітра — гілка «ґрунт» applyVars стенда рядками (тема — системна, не themeMode стенда). Світла — константи
    CSS (src/css/tokens.css): removeProperty списку grd знімає те, що написала темна, — без нього перемикання теми наживо
    лишило б темні змінні в світлій (детектор: build_smoke.js «перемикання», --inject викидає цей рядок). Пропущено рядки
-   змінних поза продуктом (--sheet · --well · --accent-soft — класифікатор build_smoke.js) і --well-bg (валь wMix — §2
-   «мертвий», 💡 S39). Аврора — у --bg-aur, removeProperty замість порожнього (стенд, коментар v17 · К1). */
+   змінних поза продуктом (--sheet · --well · --accent-soft — класифікатор build_smoke.js); --well-bg — з S39 (wMix — «живий без
+   вироку» valuesLOCK §2). Аврора — у --bg-aur, removeProperty замість порожнього (стенд, коментар v17 · К1). */
 const DARK = matchMedia('(prefers-color-scheme: dark)');
 function applyTokens(){
   const dark = DARK.matches, s = document.documentElement.style;
@@ -85,6 +85,7 @@ function applyTokens(){
     s.setProperty('--glass',   hsl(H, C*0.92, sL, .8));
     s.setProperty('--glass-rim', 'rgba(255,255,255,.11)');
     s.setProperty('--line',    'rgba(255,255,255,.075)');
+    s.setProperty('--well-bg', hsl(H, C*0.92, sL - (sL - L) * S.wMixD/100));
     /* акцент темної теми — керований, а не зашитий (знахідка «вицвіле») */
     s.setProperty('--accent',      hsl(S.aH, S.aS, S.aL));
     s.setProperty('--accent-ink',  S.aL > 56 ? hsl(S.aH, 55, 10) : '#FFFFFF');
@@ -93,6 +94,7 @@ function applyTokens(){
     /* v11 · акцент світлої тепер теж керований (був прибитий у :root) */
     s.setProperty('--accent',      hsl(S.aHL, S.aSL, S.aLL));
     s.setProperty('--accent-ink',  S.aLL > 56 ? hsl(S.aHL, 55, 10) : '#FFFFFF');
+    s.setProperty('--well-bg', mixHex('#FFFFFF', '#EFEFF3', S.wMixL/100));
   }
   const aur = aurLayers(dark);
   if (aur) s.setProperty('--bg-aur', aur); else s.removeProperty('--bg-aur');
