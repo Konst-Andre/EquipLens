@@ -1,8 +1,30 @@
-/* живе доки: живе застосунок · шар tokens (BUILD-1 Ф2-3; решта токенів — Ф2-3 далі · Ф3 частини). Теми — кожна своя (MASTER_LOCK §13).
+/* живе доки: живе застосунок · шар tokens (BUILD-1 Ф2-3: полотно · палітра; решта токенів — Ф2-3 далі · Ф3 частини). Теми — кожна своя (MASTER_LOCK §13).
    --canvas — зі стенда: світла — константа (.screenbox[data-theme="light"], стенд :232), темна — заглушка CSS стенда (:251),
    бойову темну пише js/tokens.js з важелів dkH · dkC · dkL до першого кадру. color-scheme — своя на тему (полотно, скрол, поля);
    кукбук A41: :root → light, медіазапит → dark — коректно; нативні пікери standalone-PWA заморожують схему на старті (стеля iOS) */
 @layer tokens {
-:root{--canvas:#EFEFF3;color-scheme:light}
-@media (prefers-color-scheme: dark){:root{--canvas:#08080B;color-scheme:dark}}
+/* палітра (S39) — константи .screenbox[data-theme] стенда (:232–262) рядками; темна — заглушки, бойові пише js/tokens.js.
+   Не перенесено — поза продуктом (класифікатор tools/build_smoke.js): --accent-soft (без споживача) · --ridge (без
+   споживача) · --r-card (лише рядок «row»/«slit») · --well (лише mat «well»). --well-bg — окремо: її валь wMix
+   valuesLOCK §2 мітить мертвим, а споживачі-стани є (.el-sw-ask .no) — 💡 S39 */
+:root{--canvas:#EFEFF3;color-scheme:light;
+  --surface:#FFFFFF; --raised:#FFFFFF;
+  --ink:#131318; --ink-2:#54545F; --ink-3:#8A8A96;
+  --line:rgba(18,18,28,.085); --line-hard:rgba(18,18,28,.18);
+  --accent:#E4005A; --accent-ink:#FFFFFF;
+  --neutral-fill:#1B1B21; --neutral-ink:#FFFFFF;
+  --lift:0 1px 1px rgba(16,16,24,.05),0 5px 14px rgba(16,16,24,.07);
+  --lift-s:0 1px 2px rgba(16,16,24,.07);
+  --glass:rgba(255,255,255,.80); --glass-rim:rgba(18,18,28,.09);
+  --r-ctl:10px}
+@media (prefers-color-scheme: dark){:root{--canvas:#08080B;color-scheme:dark;
+  --surface:#17171E; --raised:#242430;
+  --ink:#F0F0F5; --ink-2:#A3A3AB; --ink-3:#71717A;
+  --line:rgba(255,255,255,.075); --line-hard:rgba(255,255,255,.20);
+  --accent:#FF5C93; --accent-ink:#22040F;
+  --neutral-fill:#EDEDF2; --neutral-ink:#131318;
+  --lift:0 0 0 1px rgba(255,255,255,.055);
+  --lift-s:0 0 0 1px rgba(255,255,255,.05);
+  --glass:rgba(23,23,30,.80); --glass-rim:rgba(255,255,255,.11);
+  --r-ctl:10px}}
 }

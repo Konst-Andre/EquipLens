@@ -28,7 +28,8 @@
 //   node tools/build_smoke.js --inject   — base64 шрифту зіпсовано в пам'яті, сервер віддає іконкам 404, у білд дописано
 //                                          html{background:#010203 none;color-scheme:only light;--canvas:#010203;--zz-inject:1}
 //                                          → шрифт, оболонка, фон, color-scheme, чужа й хибна змінна мусять бути спіймані;
-//                                          джерело класифікатора без правил data-edge → відома відповідь ✗ → «ЗЛОВИВ»
+//                                          джерело класифікатора без правил data-edge → відома відповідь ✗;
+//                                          з білда викинуто removeProperty світлої гілки → перемикання dark→light ✗ → «ЗЛОВИВ»
 const fs = require('fs'), path = require('path'), http = require('http');
 // Playwright образу — /opt/node-tools (NODE_PATH хука старту веде на jsdom у ~/.deps, тож — запасний шлях)
 const { chromium } = (() => { try { return require('playwright'); } catch (e) { return require('/opt/node-tools/node_modules/playwright'); } })();
@@ -74,6 +75,7 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
 (async () => {
   let html = fs.readFileSync(file, 'utf8');
   if (inject) html = html.replace(/base64,[A-Za-z0-9+/]{400}/, m => 'base64,' + 'A'.repeat(m.length - 7));
+  if (inject) html = html.replace('grd.forEach(k => s.removeProperty(k));', '');   // зуби перемикання: темні змінні лишаються в світлій
   if (inject) html = html.replace('</head>', '<style>html{background:#010203 none!important;color-scheme:only light!important;--canvas:#010203!important;--zz-inject:1}</style></head>');
   let src = fs.readFileSync(stand, 'utf8');
   if (inject) src = src.replace(/[^{}]*\[data-edge[^{}]*\{[^}]*\}/g, '');   // зуби класифікатора: правила краю аркуша зникли
@@ -84,7 +86,7 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
     .filter(l => l.startsWith('|') && l.includes('мертві за засівом')).flatMap(l => [...l.split('|')[1].matchAll(/`(\w+)`/g)].map(m => m[1]));
   if (deadKeys.length < 20) throw new Error(`valuesLOCK §2 дав ${deadKeys.length} мертвих ключів < 20 — другий канал осліп`);
   const browser = await chromium.launch();
-  const errs = [];
+  const errs = [], standV = {};
   for (const scheme of ['light', 'dark']) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme, offline: true });
     const page = await ctx.newPage();
@@ -159,11 +161,29 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
     const alien = bk.filter(k => !(k in s.v)), wrong = bk.filter(k => k in s.v && b.v[k] !== s.v[k]), todo = prod.filter(k => !(k in b.v));
     for (const k of bk.filter(k => k in cls && !PRODUCT.includes(cls[k]))) errs.push(`${scheme}: змінна ${k} перенесена, а в стенді вона «${cls[k]}» — не продукт`);
     const by = c => sk.filter(k => cls[k] === c);
+    standV[scheme] = s.v;
     for (const k of alien) errs.push(`${scheme}: змінна ${k} — у стенді такої нема (вигадана чи перейменована)`);
     for (const k of wrong) errs.push(`${scheme}: змінна ${k} ≠ стенду — білд «${b.v[k].slice(0, 70)}» ⟂ стенд «${s.v[k].slice(0, 70)}»`);
     const list = process.argv.includes('--list');
     console.log(`  ${scheme}: змінні ≡ стенду ${wrong.length || alien.length ? '✗' : '✓'} ${bk.length - alien.length - wrong.length} з ${bk.length} · покриття стенда ${prod.length - todo.length} з ${prod.length} (живих ${by('жива').length} · станів ${by('стан').length}) · поза знаменником ${sk.length - prod.length} з ${sk.length}: службових ${by('службова').length} · вимкнених варіантів ${by('вимкнений варіант').length} · без споживача ${by('без споживача').length}` + (list ? ` · не перенесено: ${todo.join(' ')}` : ''));
     if (list) for (const c of RANK.slice(0, 3).concat('стан')) console.log(`    ${scheme} · ${c}: ${by(c).join(' ')}`);
+    await ctx.close();
+  }
+  // перемикання теми наживо (S39, підсилення палітри): застосунок відкритий, система міняє тему → змінні кореня ≡ стенду НОВОЇ
+  // теми. Chrome «dark mode»: JS, що читає matchMedia, мусить обробляти change (developer.chrome.com, 20.11.2026); iOS 17
+  // standalone тему наживо не міняв (WebKit 262212) — це судить пристрій, тут — наш бік: світла гілка знімає темні змінні.
+  for (const [from, to] of [['dark', 'light'], ['light', 'dark']]) {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: from, offline: true });
+    await ctx.route('**/*', r => r.abort());
+    const page = await ctx.newPage();
+    await page.setContent(html, { waitUntil: 'load' });
+    await page.emulateMedia({ colorScheme: to });
+    // подія change приходить з наступним кадром (замір S39: одразу після emulateMedia — 0 подій, після двох кадрів — 1)
+    await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    const v = await page.evaluate((vs) => eval(vs)(getComputedStyle(document.documentElement)), vars.toString());
+    const bad = Object.keys(v).filter(k => !BUILD_ONLY.includes(k) && !k.startsWith('--zz') && v[k] !== standV[to][k]);
+    for (const k of bad) errs.push(`перемикання ${from}→${to}: змінна ${k} «${(v[k] || '').slice(0, 60)}» ⟂ стенд «${(standV[to][k] || '—').slice(0, 60)}»`);
+    console.log(`  перемикання ${from}→${to}: змінні ≡ стенду ${bad.length ? '✗ ' + bad.length : '✓'} з ${Object.keys(v).length}`);
     await ctx.close();
   }
   // оболонка PWA — docs/ з локального сервера, як з Pages (відносні шляхи маніфесту й ?v= — справжні)
@@ -208,9 +228,10 @@ const vars = (cs) => Object.fromEntries([...cs].filter(k => k.startsWith('--')).
     const bg = ['light', 'dark'].every(sc => errs.some(e => e.startsWith(sc + ': фон ≠ стенду'))),
           cs = errs.some(e => e.startsWith('dark: color-scheme')),
           vr = errs.some(e => e.includes('змінна --canvas ≠')) && errs.some(e => e.includes('змінна --zz-inject')),
-          kl = errs.some(e => e.includes('класифікатор бреше — --edgeX'));
-    const ok = font && shell && bg && cs && vr && kl;
-    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'} · фон ${bg ? '✓' : '✗'} · color-scheme ${cs ? '✓' : '✗'} · змінні ${vr ? '✓' : '✗'} · класифікатор ${kl ? '✓' : '✗'}`);
+          kl = errs.some(e => e.includes('класифікатор бреше — --edgeX')),
+          sw = errs.some(e => e.startsWith('перемикання dark→light: змінна --surface'));
+    const ok = font && shell && bg && cs && vr && kl && sw;
+    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'} · фон ${bg ? '✓' : '✗'} · color-scheme ${cs ? '✓' : '✗'} · змінні ${vr ? '✓' : '✗'} · класифікатор ${kl ? '✓' : '✗'} · перемикання ${sw ? '✓' : '✗'}`);
     process.exit(ok ? 1 : 0);
   }
   console.log(`─── білд у браузері: помилок ${errs.length} ` + (errs.length ? '✗ ───' : '✓ ───'));
