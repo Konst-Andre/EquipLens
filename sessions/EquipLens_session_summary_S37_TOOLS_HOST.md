@@ -37,8 +37,10 @@
 
 ```text
 EquipLens — самостійна сесія Konst. Продовження S37.
-Середовище «Lens» (lens-governance:tools/claude-code/ENVIRONMENT.md). Репо: Konst-Andre/EquipLens + Konst-Andre/lens-governance (ядро — запис у main за його CLAUDE.md); на читання — AE-Simulator, QR-Lens (дозвіл Konst 20.11).
-main EquipLens = прод GitHub Pages: коміт у main — лише з «так» Konst; робота — на гілці харнеса.
+Середовище «Lens» (lens-governance:tools/claude-code/ENVIRONMENT.md). Репо: Konst-Andre/EquipLens + Konst-Andre/lens-governance (ядро — запис у main за його CLAUDE.md); на читання — AE-Simulator, QR-Lens (дозвіл Konst 20.11; sandbox — дозвіл для GAL-1).
+main EquipLens = прод GitHub Pages: коміт у main — лише з «так» Konst; робота — на гілці харнеса (S37 — claude/trusting-brahmagupta-7ru963, у main ще не злита).
 Старт: bash tools/env_check.sh → CLAUDE.md → REPO_LAYOUT.md → sessions/EquipLens_session_summary_S37_TOOLS_HOST.md §0 → lens/EquipLens_CHERGA.md цілком.
-Відкрите — S37 §0: BACK-1 крок 1 і проба входу Telegram · ADMIN-1 · UIKIT-E · GAL-1 3D (розвідка sandbox) · TOOLS-1 · HOST-1 крок Б (прод) · «Посібник» → архів · BUILD-1 Ф1.
+Відкрите — S37 §0: BACK-1 план v3.1 (lens/BACK-1_brief.md §5-б) чекає «так»; наступний крок — сторінка-проба входу Т1–Т3 + режим відкриття + пуш на iPhone і Android · воркер equiplens живий (заглушка), стенд — прев'ю stand-equiplens · BUILD-1 Ф1 valuesLOCK · ADMIN-1 · UIKIT-E (EquipLens — перший пілот кіту) · GAL-1 (3D, sandbox) · TOOLS-1 · HOST-1 крок Б (прод) з «Посібником» в архів.
+Відкрите питання Konst: експорт записів людині, що пішла, чи стерти через 30 днів.
+💡 чекають вироку Konst (з S36 §0): іспит у кінці сесії · печатка «0 справжніх» · постійний дозвіл на fast-forward main без змін сайту.
 ```
