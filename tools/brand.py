@@ -126,6 +126,28 @@ STYLES = {  # фон · гліф: заливка аркуша (верх, низ)
 ICON_STYLE = 'aurora-dark'   # ставка S38 (макет на шпалерах Konst); вирок — Konst на телефоні (A75 «фон — device-рішення»)
 ICON_SW = 1.5                # штрих гліфа в іконці (у шапці 1.2): HIG — передній план іконки сміливіший; рядок d — той самий
 ICON_CSS = 390               # px сторона кадру: аврора стенда задана в px під екран 390 — кадр тієї ж ширини
+# Кант Liquid Glass (S38, проба Konst на iPhone, iOS 27): системного канту веб-кліп НЕ отримує (іконки в Dock — з кантом,
+# наша — без) → запікаємо: тонкий світловий обідок по контуру маски iOS — суперeліпс n≈5 (точного контуру Apple не
+# публікує: squircle.js.org · applypixels.com «The Hunt for the Squircle», 20.11.2026), яскравий угорі-ліворуч, слабший
+# унизу-праворуч, боки — ледь (iOS 27: «чіткіший світловий кант»; темна смуга поруч читалась другою рамкою — прибрано). Лише «any»: maskable ріже Android.
+RIM_N, RIM_W = 5.0, 0.016    # показник суперeліпса · ширина канту, частка сторони
+
+
+def rim_svg():
+    import math
+    pts = []
+    for k in range(360):
+        t = 2 * math.pi * k / 360
+        c, s_ = math.cos(t), math.sin(t)
+        x, y = math.copysign(abs(c) ** (2 / RIM_N), c), math.copysign(abs(s_) ** (2 / RIM_N), s_)
+        pts.append(f'{50 + 50 * x:.2f} {50 + 50 * y:.2f}')   # точно по краю: зовнішню половину штриха відріже маска iOS
+    d = 'M' + ' L'.join(pts) + 'Z'
+    return ('<svg class="rim" viewBox="0 0 100 100" preserveAspectRatio="none"><defs>'
+            '<linearGradient id="rl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="rgba(255,255,255,.75)"/>'
+            '<stop offset=".35" stop-color="rgba(255,255,255,.14)"/><stop offset=".65" stop-color="rgba(255,255,255,.06)"/>'
+            '<stop offset="1" stop-color="rgba(255,255,255,.38)"/></linearGradient>'
+            '</defs>'
+            f'<path d="{d}" fill="none" stroke="url(#rl)" stroke-width="{num(RIM_W * 200)}"/></svg>')
 
 
 def icon_html(pr, kind, style):
@@ -166,7 +188,7 @@ def icon_html(pr, kind, style):
         bg = f'background-color:{L["bgc"]};background-image:{L["aur"]}'
     return (f'<!-- іконка «{kind}» · стиль {style} · згенеровано tools/brand.py icons зі стенда v17_30 (A75); руками не правити -->\n'
             f'<!doctype html><style>html,body{{margin:0}}.i{{position:relative;width:{ICON_CSS}px;height:{ICON_CSS}px;overflow:hidden;{bg}}}'
-            f'.i svg{{position:absolute;inset:0;width:100%;height:100%}}</style><div class="i">{svg}</div>\n')
+            f'.i svg{{position:absolute;inset:0;width:100%;height:100%}}</style><div class="i">{svg}{rim_svg() if kind == "any" else ""}</div>\n')
 
 
 def sources(pr, style=ICON_STYLE):
