@@ -80,6 +80,10 @@ else case "$h" in *"✗ 0"*) ;; *) fail=1;; esac; case "$s" in *"✗0"*) ;; *) f
 iv=$(python3 tools/stand_inventory.py ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "інвентар стенда${ENV_INJECT:+ --inject}: $iv"
 if [ -n "${ENV_INJECT:-}" ]; then case "$iv" in ЗЛОВИВ) ;; *) echo "✗ інвентар --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
 else case "$iv" in *"✓ ───"*) ;; *) fail=1;; esac; fi
+# valuesLOCK (BUILD-1 Ф1): lens/EquipLens_head_valuesLOCK.md ≡ засів LOCK_SEED обома боками (файл згенерований, руками не правити)
+vl=$(python3 tools/stand_inventory.py --values --check ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "valuesLOCK${ENV_INJECT:+ --inject}: $vl"
+if [ -n "${ENV_INJECT:-}" ]; then case "$vl" in ЗЛОВИВ) ;; *) echo "✗ valuesLOCK --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
+else case "$vl" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 
 # Спільні інструменти ядра — з КЛОНУ ядра поруч ($K, як профіль вище): виклик, не копія. Клон кладе setup script v3 середовища; нема клону — рядки «ядра поруч нема»: налаштувати середовище, не обходити curl-ом
 # (lens-governance:tools/claude-code/CLAUDE_CODE.md «Гачки»: ядро серед репо сесії або /tmp/lens-governance), тож «curl | python» з main — зайвий шлях
