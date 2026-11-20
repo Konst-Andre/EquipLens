@@ -1,3 +1,8 @@
-/* живе доки: живе застосунок · шар tokens — порожній до порту (BUILD-1 Ф2-3 токени · Ф3 частини) */
+/* живе доки: живе застосунок · шар tokens (BUILD-1 Ф2-3; решта токенів — Ф2-3 далі · Ф3 частини). Теми — кожна своя (MASTER_LOCK §13).
+   --canvas — зі стенда: світла — константа (.screenbox[data-theme="light"], стенд :232), темна — заглушка CSS стенда (:251),
+   бойову темну пише js/tokens.js з важелів dkH · dkC · dkL до першого кадру. color-scheme — своя на тему (полотно, скрол, поля);
+   кукбук A41: :root → light, медіазапит → dark — коректно; нативні пікери standalone-PWA заморожують схему на старті (стеля iOS) */
 @layer tokens {
+:root{--canvas:#EFEFF3;color-scheme:light}
+@media (prefers-color-scheme: dark){:root{--canvas:#08080B;color-scheme:dark}}
 }

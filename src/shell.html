@@ -16,6 +16,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#EFEFF3">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0F0E10">
+<!-- color-scheme — до розбору CSS (web.dev «color-scheme», 20.11.2026); значення й токени полотна — синхронно до першого кадру (BUILD-1 Ф2-3) -->
+<meta name="color-scheme" content="light dark">
+<!--@values-->
+<script>
+<!--@src js/tokens.js-->
+</script>
 <style>
 @layer reset, tokens, base, components, utilities;
 <!--@src css/reset.css-->
@@ -27,7 +33,6 @@
 </head>
 <body>
 <div id="app"></div>
-<!--@values-->
 <script>
 <!--@src js/main.js-->
 </script>

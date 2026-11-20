@@ -1,10 +1,12 @@
 /* живе доки: живе застосунок · шар base. Шрифт тексту — Manrope (OFL, src/fonts/OFL.txt), вшитий збіркою (BUILD-1 Ф2-2а);
-   фон і color-scheme обох тем — Ф2-3 токени (теми — не інверсія, MASTER_LOCK §13) */
+   полотно (фон і аврора) — Ф2-3 токени (src/css/tokens.css · src/js/tokens.js; теми — не інверсія, MASTER_LOCK §13) */
 @font-face{font-family:'Manrope';src:/*@font fonts/manrope.woff2*/;font-weight:200 800;font-style:normal;font-display:swap}
 @layer base {
 /* safe-area (BUILD-1 Ф2-2б; кукбук A55 (1), A10): black-translucent зсуває документ угору на верхній inset → без цього
    знизу в standalone гола смуга рівно цієї висоти. Відступи — змінними для компонентів; env() не зменшувати (A10) */
 html{min-height:calc(100% + env(safe-area-inset-top))}
 :root{--sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px)}
+/* полотно — на html (фон кореня малює весь в'юпорт); longhand-и, бо скорочення background скинуло б image (стенд :86) */
+html{background-color:var(--canvas);background-image:var(--bg-aur,none)}
 body{font-family:'Manrope',system-ui,sans-serif}
 }
