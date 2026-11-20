@@ -219,6 +219,7 @@ def values(path, js, body, check, inject):
                 errs.append('у шапці файла нема «Засіяно зі стенда `…` (md5 `…`)» — не звірити, чи стенд заморожений')
             elif (m.group(1), m.group(2)) != (os.path.basename(path), md5):
                 errs.append(f'стенд не заморожений: живий {os.path.basename(path)} md5 {md5[:12]} ≠ засіяний {m.group(1)} {m.group(2)[:12]} (BUILD-1 (в))')
+            sys.dont_write_bytecode = True
             sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
             from build import parse
             fv, _, _ = parse(cur)

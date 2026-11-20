@@ -82,8 +82,9 @@ if [ -n "${ENV_INJECT:-}" ]; then case "$iv" in ЗЛОВИВ) ;; *) echo "✗ і
 else case "$iv" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 # джерело чисел (BUILD-1, рішення Konst 20.11.2026): lens/EquipLens_head_valuesLOCK.md — форма (build.py) і бік стенда (стенд заморожений,
 # кожен ключ засіву має рядок; нові вироки — ⓘ). Обидва з зубами --inject
-for vc in "build.py values --check" "stand_inventory.py --values --check"; do
-  vl=$(python3 tools/$vc ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "valuesLOCK · ${vc%% *}${ENV_INJECT:+ --inject}: $vl"
+# + збірка (BUILD-1 Ф2-1): docs/index.html ≡ зібраному з src/ і valuesLOCK
+for vc in "build.py values --check" "stand_inventory.py --values --check" "build.py build --check"; do
+  vl=$(python3 tools/$vc ${ENV_INJECT:+--inject} 2>&1 | tail -1); echo "${vc#* } · ${vc%% *}${ENV_INJECT:+ --inject}: $vl"
   if [ -n "${ENV_INJECT:-}" ]; then case "$vl" in ЗЛОВИВ) ;; *) echo "✗ valuesLOCK · ${vc%% *} --inject не зловив підкинуте — гейт без зубів"; fail=1;; esac
   else case "$vl" in *"✓ ───"*) ;; *) fail=1;; esac; fi
 done

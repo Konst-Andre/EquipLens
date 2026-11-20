@@ -15,7 +15,13 @@
                                              число — число · позначка «⚠ межа» ≡ вирок на межі · §0 «засів: N» і «на межі: N» ≡ рядкам · §1 «на межі» ≡ рядкам,
                                              де вирок = min чи max свого повзунка → ✗ (exit 1)
   … --check --inject                       — підкидає дубль ключа й «число» з літерою → «ЗЛОВИВ»
-Лише stdlib. Наступні частини (дерево src/, збірка одного HTML, «зібране ≡ джерелам») — BUILD-1 Ф2.
+  python3 tools/build.py build             — src/shell.html → docs/index.html: мітки <!--@src шлях--> (шлях від src/)
+                                             вставляють файл з коментарем-міткою джерела; <!--@values--> — JSON-блок
+                                             значень (екрановано < > & U+2028/9 як \u003c… — практика Django,
+                                             adamj.eu «Safely including data for JavaScript», 20.11.2026); звіт розміру
+  python3 tools/build.py build --check     — зібране в пам'яті ≡ закоміченому docs/index.html (і відсутній файл,
+                                             і мітка без файла) → ✗; з --inject — змінює джерело в пам'яті → «ЗЛОВИВ»
+Лише stdlib. Наступні частини — BUILD-1 §4-в: Ф2-2 маніфест і шрифти · Ф2-3 токени.
 """
 import json, os, re, sys
 
@@ -111,9 +117,66 @@ def cmd_values(argv):
     return 1 if errs else 0
 
 
+SRC = os.path.join(ROOT, 'src')
+OUT = os.path.join(ROOT, 'docs', 'index.html')
+MARK = re.compile(r'<!--@src ([\w./-]+)-->')
+ESC = {'<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029'}
+
+
+def build_text(override=None):
+    """Збирає один HTML; override {шлях: текст} — підміна джерела в пам'яті (--inject)."""
+    override, errs, parts = override or {}, [], []
+    read = lambda rel: override[rel] if rel in override else open(os.path.join(SRC, rel), encoding='utf-8').read()
+
+    def one(m):
+        rel = m.group(1)
+        if rel not in override and not os.path.isfile(os.path.join(SRC, rel)):
+            errs.append(f'мітка без файла: src/{rel}')
+            return m.group(0)
+        body = read(rel).rstrip('\n')
+        parts.append((rel, len(body.encode('utf-8'))))
+        tag = f'/* @src {rel} */' if rel.endswith(('.css', '.js')) else f'<!-- @src {rel} -->'
+        return f'{tag}\n{body}'
+    html = MARK.sub(one, read('shell.html'))
+    vals = load_values()
+    js = json.dumps(vals, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+    js = ''.join(ESC.get(c, c) for c in js)
+    parts.append(('values (JSON)', len(js.encode('utf-8'))))
+    if html.count('<!--@values-->') != 1:
+        errs.append(f'мітка <!--@values--> має бути рівно одна (є {html.count("<!--@values-->")})')
+    html = html.replace('<!--@values-->', f'<script type="application/json" id="values">{js}</script>')
+    return html, parts, errs
+
+
+def cmd_build(argv):
+    check, inject = '--check' in argv, '--inject' in argv
+    over = {'js/main.js': open(os.path.join(SRC, 'js', 'main.js'), encoding='utf-8').read() + '\n// zzInj\n'} if inject else None
+    html, parts, errs = build_text(over)
+    rel = os.path.relpath(OUT, ROOT)
+    print(f'збірка · src/ → {rel}' + (' · --check' if check else '') + (' · --inject' if inject else ''))
+    if not check and not inject and not errs:
+        os.makedirs(os.path.dirname(OUT), exist_ok=True)
+        open(OUT, 'w', encoding='utf-8').write(html)
+        print(f'  записано {rel}')
+    elif not errs:
+        if not os.path.exists(OUT):
+            errs.append(f'нема {rel} — збери: build')
+        elif open(OUT, encoding='utf-8').read() != html:
+            errs.append(f'{rel} ≠ зібраному з src/ і valuesLOCK — правили зібране руками чи не перезібрали: build')
+    print('  розмір: ' + ' · '.join(f'{n} {b}' for n, b in parts) + f' · усього {len(html.encode("utf-8"))} Б')
+    for e in errs:
+        print('  ✗ ' + e)
+    if inject:
+        print('ЗЛОВИВ' if errs else 'НЕ ЗЛОВИВ — детектор без зубів')
+        return 1 if errs else 0
+    print(f'─── збірка: помилок {len(errs)} ' + ('✓ ───' if not errs else '✗ ───'))
+    return 1 if errs else 0
+
+
 if __name__ == '__main__':
     a = sys.argv[1:]
-    if not a or a[0] != 'values':
+    cmds = {'values': cmd_values, 'build': cmd_build}
+    if not a or a[0] not in cmds:
         print(__doc__)
         sys.exit(2)
-    sys.exit(cmd_values(a[1:]))
+    sys.exit(cmds[a[0]](a[1:]))

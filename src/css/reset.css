@@ -1,0 +1,8 @@
+/* живе доки: живе застосунок · шар reset — порт 1:1 зі стенда v17_30 (інвентар Ф0: CSS_ELEM_A) */
+@layer reset {
+*{-webkit-tap-highlight-color:transparent;scrollbar-width:none}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+button{font-family:inherit;border:none;cursor:pointer;background:none;color:inherit}
+::selection{background:transparent}
+}
