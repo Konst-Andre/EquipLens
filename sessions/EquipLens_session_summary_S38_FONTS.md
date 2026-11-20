@@ -4,7 +4,7 @@
 
 # EquipLens · S38 — Ф2-2: шрифти й маніфест
 
-**Що ти побачиш:** ліцензію Chillax прочитано з файлу набору — суперечність S33 ⟂ DES-1 п.9 розв'язана; план Ф2-2 (а — шрифт тексту Manrope вшитий · б — маніфест й іконки) чекає «так»; шлях знака Chillax — на твій вирок.
+**Що ти побачиш (кінець S38, 20.11):** Ф2-2 ✅ (шрифт · маніфест · іконка «скло на аврорі» прийнята на iPhone · знак Chillax) · прилад іконки — у ядрі (`ICON-1` ✅) · аудит `CLAUDE.md` проєкту ✅ · **далі — Ф2-3, спершу детектор «токени ≡ стенду»**.
 
 ---
 
@@ -24,6 +24,7 @@
 
 | # | що | коміт |
 |---|---|---|
+| 19 | Переїзд (слово Konst «ревізія, іспит і в новій сесії продовжуємо»): ротація журналу гачків (6 рядків S37 → архів, 26 → 22.7 КБ) · §0 і стартове — «зараз і далі» зверху · ревізія · іспит | ядро `4e4543a` · (цей коміт) |
 | 18 | Konst: «виконай те, що лишилось» + «добро» на аудит `CLAUDE.md` проєкту (клас 2) + 💡 «детектор токенів першим» — «приймаю з підсиленням». Зроблено: `tools/env_check.sh` — рядок `cf_budget` повернуто (воркер є з S37; ⚠ CPU airlens — борг ядра `CF-CPU`, не EquipLens) · черга: примірка табів острівця — етап 2 разом з «+», порт — етап 4 (розведено) · `CLAUDE.md` проєкту: стан — вказівником на самері §0 і BUILD-1 §0 (пошук: стан, що застаріває, у CLAUDE.md шкодить — dev.to «CLAUDE.md best practices», 2026), правило `main` з fast-forward, рядок білда · 💡 Ф2-3 з підсиленням — `lens/BUILD-1_brief.md` §4-в п.3 · аудит класу 2 (opus high $1.05 + sonnet high $0.85): 12 знахідок, збігів 4 → застосовано 7 + 2 поза файлом (`lens/EquipLens_AUDIT.md` верхній рядок); справжня вада поза файлом — дати журналу не ISO → `env_check` писав «журналу нема»; виправлено + зуби в шаблоні ядра | `e38ff9c` · `daea865` · ядро `eb10474` · журнал гачків `1d1218a` |
 | 17 | Повторний іспит (haiku, 135 с, ≈$0.16, HEAD EquipLens@`1ed7c8d` · ядро@`ccd93c4`): незрозуміло 9 → **7** · виправлено тут: «(цей коміт)» рядка 15 → хеш · рядок 9 «main = 7f90dec» — «на той хід» · `lens/HOST-1_brief.md` §3 старий порядок Б позначено «замінено» · `lens/BUILD-1_brief.md`:78 «до вироку знак — без Chillax» → вирок «А» ✅. **Лишились:** `CLAUDE.md` проєкту — «білда ще нема», правило `main` і `docs/` у `main` до Б (клас 2, аудит за командою Konst) · `tools/env_check.sh` cf_budget (воркер `equiplens` є з S37 — рядок повернути з HOST-1 Б) · таби: «примірки «+» з табами» (етап 2) ⟂ таби острівця (етап 4, `lens/DES-1_brief.md`:54) — різні предмети, у тексті не розведено | `8d74f08` |
 | 16 | `ICON-1` ✅ — прилад іконки в ядрі: `lens-governance:tools/claude-code/pwa_icon.py` (selftest 9/9 на синтетичній сторінці) + конфіг `tools/icon.json`; `tools/brand.py` → лише знак-напис (553 → 220 рядків) · доказ точного переносу: тіла кадрів ≡, **пікселі всіх 6 PNG ≡ до байта** (змінилась лише печатка — шапка кадру називає новий прилад; перевстановлювати іконку не треба) · `env_check` ✓ · `ENV_INJECT` — усе «ЗЛОВИВ» · `.claude/settings.json` — вузьке правило приладу. Пошук: @vite-pwa/assets-generator (прилад + конфіг проєкту — беремо; джерело-картинку — ні: у нас гліф) · web.dev maskable (коло 40 % → гліф 0.50 вміщується) | `59f6814` · ядро `ccd93c4` |
@@ -46,12 +47,13 @@
 ## §6 · Стартове повідомлення наступної сесії
 
 ```text
-EquipLens — самостійна сесія Konst. Продовження S38.
-Середовище «Lens» (lens-governance:tools/claude-code/ENVIRONMENT.md). Репо: Konst-Andre/EquipLens + Konst-Andre/lens-governance (ядро — запис у main за його CLAUDE.md).
-main EquipLens = прод GitHub Pages: коміт у main — лише з «так» Konst; робота — на гілці харнеса (S38 — claude/equiplens-stage-1-framework-e8l785; origin/main ≡ гілці — fast-forward, коли корінь сайту не змінюється, «так» Konst S38 §0 п.2-а).
+EquipLens — самостійна сесія Konst. Продовження S38 (20.11.2026).
+ЗАРАЗ: BUILD-1 Ф2-3 токени. СПЕРШУ детектор «токени ≡ стенду» (💡 S38, «так з підсиленням» Konst): розширення tools/build_smoke.js — обчислені в Chromium фон (background-color · background-image) і color-scheme полотна стенда (#sbox, tools/EquipLens_headbench_v17_30.html) ⟂ кореня білда (docs/index.html), обидві теми, viewport 390, з --inject; потім — сам фон і color-scheme обох тем у src/css/base.css, далі решта токенів з lens/EquipLens_head_valuesLOCK.md. План — lens/BUILD-1_brief.md §4-в п.3 (цикл: план → мікроскоп → «так»).
+ДАЛІ: HOST-1 крок Б (lens/HOST-1_brief.md — прод, окреме «так» Konst) → етап 2 (lens/EquipLens_CHERGA.md «Маршрут v1»: примірка «+» разом з табами острівця).
 Старт: bash tools/env_check.sh → CLAUDE.md → REPO_LAYOUT.md → sessions/EquipLens_session_summary_S38_FONTS.md §0 → lens/EquipLens_CHERGA.md цілком.
-Маршрут v1 — lens/EquipLens_CHERGA.md «Маршрут v1». Зараз — етап 1 «каркас»: BUILD-1 Ф2-2а ✅ (Manrope вшитий) · Ф2-2б ✅ (маніфест, іконки з гліфа Н5, safe-area — прилад ядра lens-governance:tools/claude-code/pwa_icon.py з конфігом tools/icon.json (ICON-1 ✅); іконка «скло на аврорі» з кантом ✅ прийнята Konst на iPhone, lens/DES-1_brief.md «Іконки PWA») · знак «EquipLens» ✅ (src/brand/wordmark.svg — у білд з портом шапки Ф3) → Ф2-3 токени з детектором «токени ≡ стенд» (першим — фон і color-scheme обох тем) → HOST-1 крок Б (прод — «так» Konst).
-Знак — SVG-контур Chillax (вирок «А») ✅: src/brand/wordmark.svg, прилад tools/brand.py wordmark (lens/BUILD-1_brief.md §4-в п.2-а). main: fast-forward з гілки, коли сайт кореня не змінюється («так» Konst, S38 §0 п.2-а). Репо → приватне після HOST-1 Б.
-Етап 2 — примірки «+» з табами і свайп картки одним сеансом вироку → порт картки + тестувальник «як людина» (TOOLS-1). Кожна тема — своя (MASTER_LOCK §13): перевірка завжди в обох.
-Чекає Konst: проба Т1–Т3 · експорт людині, що пішла · аудит CLAUDE.md проєкту ✅ 20.11 (S38) · 💡 з S36 (іспит · печатка).
+Середовище «Lens» (lens-governance:tools/claude-code/ENVIRONMENT.md). Репо: Konst-Andre/EquipLens + Konst-Andre/lens-governance (ядро — запис у main за його CLAUDE.md).
+Гілка: робота — на гілці харнеса; main EquipLens = прод GitHub Pages — fast-forward main до гілки, коли сайт кореня (index.html · data/ · media/) не змінюється («так» Konst S38; правило — CLAUDE.md «Гілка»).
+Що вже є (S38): Manrope вшитий (tools/fonts.py) · маніфест й іконки — прилад ядра lens-governance:tools/claude-code/pwa_icon.py з конфігом tools/icon.json (ICON-1 ✅; іконку Konst прийняв на iPhone) · знак «EquipLens» — src/brand/wordmark.svg (tools/brand.py wordmark; у білд — з портом шапки Ф3) · аудит CLAUDE.md проєкту ✅ (lens/EquipLens_AUDIT.md).
+Кожна тема — своя (lens/EquipLens_MASTER_LOCK.md §13): перевірка завжди в обох. Репо → приватне після HOST-1 Б.
+Чекає Konst: проба входу Т1–Т3 на iPhone і Android (lens/BACK-1_brief.md §5-б) · експорт записів людині, що пішла · HOST-1 Б (прод) · 💡 з S36 (іспит у кінці сесії · печатка «0 справжніх»).
 ```
