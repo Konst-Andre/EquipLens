@@ -28,10 +28,10 @@
 
 | файл | що |
 |---|---|
-| `sessions/EquipLens_session_summary_S37_TOOLS_HOST.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): прилади як в AE, воркер, стенд-прев'ю |
-| `sessions/EquipLens_session_summary_S36_CC_ADOPT.md` | попереднє: адаптація під Claude Code |
+| `sessions/EquipLens_session_summary_S38_FONTS.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): Ф2-2 шрифти й маніфест, ліцензія Chillax прочитана |
+| `sessions/EquipLens_session_summary_S37_TOOLS_HOST.md` | попереднє: прилади як в AE, воркер, стенд очима, Ф1–Ф2-1 |
 
-Витіснені — `archive/summaries/` (S1…S35; S35 — останнє по стенду, засів `LOCK_SEED` §1).
+Витіснені — `archive/summaries/` (S1…S36; S35 — останнє по стенду, засів `LOCK_SEED` §1).
 
 ## Канон
 
