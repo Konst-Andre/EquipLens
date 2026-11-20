@@ -8,17 +8,27 @@
 // Оболонка PWA (Ф2-2б): docs/ віддає локальний сервер, як Pages; маніфест — помилки розбору від самого Chromium (CDP
 // Page.getAppManifest) · кожна іконка маніфесту (адреса відносно маніфесту, з ?v=) і apple-touch-icon / favicon вантажаться
 // й мають заявлений розмір. Page.getInstallabilityErrors НЕ беремо: headless Chromium 157 дає [] навіть без маніфесту (замір S38).
-//   node tools/build_smoke.js --inject   — base64 шрифту зіпсовано в пам'яті І сервер віддає іконкам 404 → обидва мусять
-//                                          бути спіймані → «ЗЛОВИВ»
+// Токени ≡ стенду (Ф2-3, S39; план — lens/BUILD-1_brief.md §4-в п.3-а): полотно білда (html) ⟂ полотно стенда (#sbox
+// замороженого стенда, засів LOCK_SEED, тему ставить детектор — у стенда за замовчуванням light) — ОБЧИСЛЕНІ в Chromium
+// background-color · -image · -size · -position · -repeat · -attachment, рівність рядків, обидві теми. color-scheme стенда —
+// normal (властивості в стенді нема) → судиться інакше: color-scheme кореня білда мусить містити свою тему.
+// Практика (20.11.2026): обчислені стилі двох сторінок фіксованим переліком властивостей — dev.to «Design QA at 1:1»,
+// qaskills «assert CSS computed style»; toHaveCSS з @playwright/test не беремо — тут бібліотека без раннера.
+//   node tools/build_smoke.js --inject   — base64 шрифту зіпсовано в пам'яті, сервер віддає іконкам 404 І в білд дописано
+//                                          html{background:#010203 none;color-scheme:only light} → усі три мусять бути
+//                                          спіймані → «ЗЛОВИВ»
 const fs = require('fs'), path = require('path'), http = require('http');
 // Playwright образу — /opt/node-tools (NODE_PATH хука старту веде на jsdom у ~/.deps, тож — запасний шлях)
 const { chromium } = (() => { try { return require('playwright'); } catch (e) { return require('/opt/node-tools/node_modules/playwright'); } })();
 const inject = process.argv.includes('--inject');
 const file = path.join(__dirname, '..', 'docs', 'index.html');
+const stand = path.join(__dirname, 'EquipLens_headbench_v17_30.html');   // заморожений стенд (CLAUDE.md, BUILD-1 §3)
+const BG = ['backgroundColor', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat', 'backgroundAttachment'];
 
 (async () => {
   let html = fs.readFileSync(file, 'utf8');
   if (inject) html = html.replace(/base64,[A-Za-z0-9+/]{400}/, m => 'base64,' + 'A'.repeat(m.length - 7));
+  if (inject) html = html.replace('</head>', '<style>html{background:#010203 none!important;color-scheme:only light!important}</style></head>');
   const browser = await chromium.launch();
   const errs = [];
   for (const scheme of ['light', 'dark']) {
@@ -46,6 +56,23 @@ const file = path.join(__dirname, '..', 'docs', 'index.html');
     if (!r.on) errs.push(`${scheme}: Manrope не малює (вшитий шрифт не доїхав) — body: ${r.body}`);
     if (r.values === '0') errs.push(`${scheme}: JSON-блок значень не прочитано (data-values = 0)`);
     console.log(`  ${scheme}: помилок JS ${pe.length} · Manrope ${r.on ? '✓' : '✗'} · канарка ${r.sane ? '✓' : '✗'} · значень ${r.values}`);
+    // токени ≡ стенду: полотно білда ⟂ полотно стенда тієї самої теми
+    const b = await page.evaluate(BG => { const c = getComputedStyle(document.documentElement);
+      return { bg: Object.fromEntries(BG.map(k => [k, c[k]])), cs: c.colorScheme }; }, BG);
+    const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: scheme });
+    await sctx.route(u => !u.protocol.startsWith('file'), r => r.abort());   // Fontshare й інше назовні — ні
+    const sp = await sctx.newPage();
+    await sp.goto('file://' + stand, { waitUntil: 'load' });
+    const s = await sp.evaluate(([BG, sc]) => { themeMode = sc; render();   // let-змінна й функція стенда (стенд :1626, :2350)
+      const n = document.getElementById('sbox'), c = getComputedStyle(n);
+      return { theme: n.dataset.theme, bg: Object.fromEntries(BG.map(k => [k, c[k]])) }; }, [BG, scheme]);
+    await sctx.close();
+    if (s.theme !== scheme) errs.push(`${scheme}: стенд не перемкнувся на тему (data-theme = ${s.theme}) — детектор бреше`);
+    const diff = BG.filter(k => b.bg[k] !== s.bg[k]);
+    for (const k of diff) errs.push(`${scheme}: фон ≠ стенду — ${k}: білд «${b.bg[k].slice(0, 90)}» ⟂ стенд «${s.bg[k].slice(0, 90)}»`);
+    const csOk = b.cs.split(/\s+/).includes(scheme);
+    if (!csOk) errs.push(`${scheme}: color-scheme кореня «${b.cs}» без «${scheme}» (теми — кожна своя, MASTER_LOCK §13)`);
+    console.log(`  ${scheme}: фон ≡ стенду ${diff.length ? '✗ ' + diff.length + ' з ' + BG.length : '✓ ' + BG.length + ' з ' + BG.length} · color-scheme «${b.cs}» ${csOk ? '✓' : '✗'}`);
     await ctx.close();
   }
   // оболонка PWA — docs/ з локального сервера, як з Pages (відносні шляхи маніфесту й ?v= — справжні)
@@ -85,10 +112,12 @@ const file = path.join(__dirname, '..', 'docs', 'index.html');
   srv.close();
   await browser.close();
   for (const e of errs) console.log('  ✗ ' + e);
-  if (inject) {   // зуби — кожен детектор окремо: шрифт і встановлюваність
+  if (inject) {   // зуби — кожен детектор окремо: шрифт, встановлюваність, фон, color-scheme
     const font = errs.some(e => e.includes('Manrope не малює')), shell = errs.some(e => e.startsWith('оболонка'));
-    const ok = font && shell;
-    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'}`);
+    const bg = ['light', 'dark'].every(sc => errs.some(e => e.startsWith(sc + ': фон ≠ стенду'))),
+          cs = errs.some(e => e.startsWith('dark: color-scheme'));
+    const ok = font && shell && bg && cs;
+    console.log(ok ? 'ЗЛОВИВ' : `НЕ ЗЛОВИВ — шрифт ${font ? '✓' : '✗'} · оболонка ${shell ? '✓' : '✗'} · фон ${bg ? '✓' : '✗'} · color-scheme ${cs ? '✓' : '✗'}`);
     process.exit(ok ? 1 : 0);
   }
   console.log(`─── білд у браузері: помилок ${errs.length} ` + (errs.length ? '✗ ───' : '✓ ───'));
