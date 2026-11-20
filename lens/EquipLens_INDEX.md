@@ -26,10 +26,10 @@
 
 | файл | що |
 |---|---|
-| `sessions/EquipLens_session_summary_S36_CC_ADOPT.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): адаптація під Claude Code |
-| `sessions/EquipLens_session_summary_S35_OSTRIVETS.md` | попереднє (останнє по стенду) |
+| `sessions/EquipLens_session_summary_S37_TOOLS_HOST.md` | останнє самері продукту (§0 «ВІДКРИТЕ» — зверху): прилади як в AE, воркер, стенд-прев'ю |
+| `sessions/EquipLens_session_summary_S36_CC_ADOPT.md` | попереднє: адаптація під Claude Code |
 
-Витіснені — `archive/summaries/` (S1…S34).
+Витіснені — `archive/summaries/` (S1…S35; S35 — останнє по стенду, засів `LOCK_SEED` §1).
 
 ## Канон
 
