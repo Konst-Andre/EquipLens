@@ -21,9 +21,10 @@
                                              adamj.eu «Safely including data for JavaScript», 20.11.2026); звіт розміру
   python3 tools/build.py build --check     — зібране в пам'яті ≡ закоміченому docs/index.html (і відсутній файл,
                                              і мітка без файла) → ✗; з --inject — змінює джерело в пам'яті → «ЗЛОВИВ»
-Лише stdlib. Наступні частини — BUILD-1 §4-в: Ф2-2 маніфест і шрифти · Ф2-3 токени.
+  мітка /*@font fonts/x.woff2*/ у CSS (Ф2-2а) — url(data:font/woff2;base64,…): шрифт вшито, SW кешує один файл
+Лише stdlib. Наступні частини — BUILD-1 §4-в: Ф2-2б маніфест й іконки · Ф2-3 токени.
 """
-import json, os, re, sys
+import base64, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VALUES = os.path.join(ROOT, 'lens', 'EquipLens_head_valuesLOCK.md')
@@ -120,6 +121,7 @@ def cmd_values(argv):
 SRC = os.path.join(ROOT, 'src')
 OUT = os.path.join(ROOT, 'docs', 'index.html')
 MARK = re.compile(r'<!--@src ([\w./-]+)-->')
+FONT = re.compile(r'/\*@font ([\w./-]+\.woff2)\*/')   # Ф2-2а: шрифт тексту base64-ом (tools/fonts.py)
 ESC = {'<': '\\u003c', '>': '\\u003e', '&': '\\u0026', '\u2028': '\\u2028', '\u2029': '\\u2029'}
 
 
@@ -138,6 +140,17 @@ def build_text(override=None):
         tag = f'/* @src {rel} */' if rel.endswith(('.css', '.js')) else f'<!-- @src {rel} -->'
         return f'{tag}\n{body}'
     html = MARK.sub(one, read('shell.html'))
+
+    def font(m):
+        rel = m.group(1)
+        p = os.path.join(SRC, rel)
+        if not os.path.isfile(p):
+            errs.append(f'мітка шрифту без файла: src/{rel} — python3 tools/fonts.py build')
+            return m.group(0)
+        b = base64.b64encode(open(p, 'rb').read()).decode('ascii')
+        parts.append((rel + ' (base64)', len(b)))
+        return f'/* @font {rel} */ url("data:font/woff2;base64,{b}") format("woff2")'
+    html = FONT.sub(font, html)
     vals = load_values()
     js = json.dumps(vals, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
     js = ''.join(ESC.get(c, c) for c in js)

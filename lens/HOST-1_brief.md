@@ -49,3 +49,5 @@
 - `workers.dev` Cloudflare радить лише «для хобі-проєктів» — прийнятий ризик ядра, доки нема домену (`CLOUDFLARE.md` п. 12).
 
 ## §7 Як спрацював (заповнити при закритті)
+
+**S38 (20.11.2026) — приватне репо (задум Konst):** після кроку Б, не раніше — на безкоштовному плані GitHub Pages працює лише з публічного репо ([docs.github.com — creating a Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site), 20.11.2026); зробити приватним до Б = прод «Посібника» ляже. Порядок: Б (воркер віддає `docs/`, Pages вимкнено) → приватне → перевірка: Workers Builds бачить репо · `env_check` `github=200`. Виграш: службове (`lens/` · `sessions/` · `tools/`) більше не публічне; рішення — `lens/BUILD-1_brief.md` §3.

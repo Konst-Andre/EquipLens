@@ -13,4 +13,6 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then exit 0; fi
 #   потрібен детектору «стенд ≡ білд» (lens/BUILD-1_brief.md §5-а Ф3) і селф-тестам приладів ядра (clip · port_same · pw_quiet)
 PWV=$(python3 -c "import json;print(json.load(open('/opt/node-tools/node_modules/playwright/package.json'))['version'])" 2>/dev/null || true)
 [ -n "$PWV" ] && { python3 -c "import importlib.metadata as m,sys; sys.exit(m.version('playwright')!='$PWV')" 2>/dev/null || pip install -q "playwright==$PWV" >/dev/null 2>&1 || true; }
-echo "session-start: playwright-python ${PWV:-—} · jsdom ($HOME/.deps) · NODE_PATH"
+# шрифт білда (BUILD-1 Ф2-2а): tools/fonts.py build і --check — fonttools + brotli (woff2)
+python3 -c "import fontTools, brotli" 2>/dev/null || pip install -q fonttools brotli >/dev/null 2>&1 || pip install -q --break-system-packages fonttools brotli >/dev/null 2>&1 || true
+echo "session-start: playwright-python ${PWV:-—} · jsdom ($HOME/.deps) · NODE_PATH · fonttools"

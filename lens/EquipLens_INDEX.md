@@ -54,6 +54,8 @@
 | `tools/env_check.sh` | перевірка середовища на старті: база · гейт продукту · прод Pages за вмістом · стенд `--html` і смоук · інвентар стенда · прилади ядра; опис — `REPO_LAYOUT.md` | існує репо |
 | `tools/audit_prompts.sh` | аудит інструкцій за класом — копія ядра як є (AUD-2) | є аудит інструкцій |
 | `tools/build.py` | збірка білда (`BUILD-1` Ф2): `build` — src → docs/index.html (`--check` — зібране ≡ закоміченому, `--inject`) · `values` — розбір джерела чисел (`--check` — форма файла, `--json`, `--inject`); опис — `REPO_LAYOUT.md` | живе застосунок |
+| `tools/fonts.py` | шрифт тексту білда (`BUILD-1` Ф2-2а): `build` — підмножина Manrope з `sources/fonts/` → `src/fonts/manrope.woff2` · `--check` — вісь wght 200–800, версія, бюджет 40 000 Б, кожен символ тексту `src/` у шрифті (`--inject`); в `env_check`, fonttools — хук старту |
+| `tools/build_smoke.js` | смоук зібраного білда в Chromium (`BUILD-1` Ф2-2а): без мережі, обидві теми — 0 помилок JS · Manrope малює (канарка ширини зі стенда) · `--inject` псує base64 шрифту → «ЗЛОВИВ»; в `env_check` |
 | `tools/stand_inventory.py` | інвентар стенда (`BUILD-1` Ф0): кожне CSS-правило, статичний елемент і функція JS → застосунок · harness · токени · мішане; непоміщене → ✗, `--inject` → «ЗЛОВИВ»; `--values` — засіває valuesLOCK (лише коли файла нема), `--values --check` — бік стенда (`BUILD-1` Ф1); опис — `REPO_LAYOUT.md` | стенд не портовано (`BUILD-1` Ф3) |
 | `tools/EquipLens_K0_passport_audit.js` | аудит паспорта стенда К0 (самері S17 §4) | паспорт не переїхав у білд |
 

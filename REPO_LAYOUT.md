@@ -24,10 +24,10 @@ EquipLens/
 │  ├─ shots/          примірка UI-рішень наперед (README — стан)
 │  └─ evidence/       докази вад до примірки (знімки Konst, плівка машини) — оголошено в INDEX, видаляються з закриттям пункту
 ├─ sessions/          живі самері (стеля 2)
-├─ src/               джерела білда (BUILD-1 Ф2): shell.html (оболонка з мітками) · css/ (5 шарів @layer) · js/
+├─ src/               джерела білда (BUILD-1 Ф2): shell.html (оболонка з мітками) · css/ (5 шарів @layer) · js/ · fonts/ (Manrope-підмножина + OFL, згенеровано tools/fonts.py)
 ├─ docs/              ЗІБРАНИЙ білд — docs/index.html (tools/build.py build; руками не правити). Тека сайту за Р-7: на гілці — так, у main — лише з HOST-1 Б
 ├─ tools/             стенд з важелями, смоук, прилади, збірка
-├─ sources/           оригінали (xlsx, zip, фото)
+├─ sources/           оригінали (xlsx, zip, фото; fonts/ — Manrope[wght].ttf + OFL, джерело підмножини)
 ├─ archive/           історія: самері · стенди · матриці — не правиться
 └─ .claude/           налаштування Claude Code і хук старту
 ```
@@ -41,6 +41,8 @@ EquipLens/
 | `tools/audit_prompts.sh` | аудит інструкцій моделями (`/doctor prompt-audit`), клас 1 — opus, клас 2 — ще й sonnet; журнал — `lens/EquipLens_AUDIT.md` | змінив `CLAUDE.md` / правило — пакетом перед самері, після заміру лімітів | `bash tools/audit_prompts.sh 2 CLAUDE.md` |
 | `tools/smoke_v*.js` | механіка головного стенда (не значення важелів); живий — найбільший номер | після кожної правки стенда | `cd tools && node smoke_v17_30.js` · `--inject` |
 | `tools/build.py` | збірка білда `BUILD-1` Ф2 (свій скрипт Python без npm — ARCH-1). **`build`** (Ф2-1): `src/shell.html` → `docs/index.html` — мітки `<!--@src шлях-->` вставляють файл з коментарем-міткою джерела, `<!--@values-->` — JSON-блок значень (екрановано `< > &` і U+2028/9); `build --check` — зібране ≡ закоміченому (руками зібране не правити). **`values`** — джерело чисел: суворий розбір `lens/EquipLens_head_valuesLOCK.md` §3 (рядок за формою · ключ унікальний · число — число · «⚠ межа» ≡ вирок на межі · §0 і §1 ≡ рядкам); `load_values()` — для збірки | `env_check` сам; руками — правив valuesLOCK | `python3 tools/build.py values` · `--check` · `--json` · `--check --inject` → «ЗЛОВИВ» |
+| `tools/fonts.py` | шрифт тексту (Ф2-2а): `build` — підмножина Manrope → `src/fonts/manrope.woff2`; `--check` — вісь, версія, бюджет, символи тексту `src/` | правка `sources/fonts/` чи нові символи в UI → `build`, тоді `tools/build.py build` |
+| `tools/build_smoke.js` | білд у браузері (Ф2-2а): Chromium без мережі, обидві теми — 0 помилок JS, Manrope малює | `env_check` (чистий і `--inject`) |
 | `tools/stand_inventory.py` | інвентар стенда `BUILD-1` Ф0: кожне CSS-правило (і в `@media`), статичний елемент з class/id і функція JS → застосунок · harness · токени (обчислення з `S` → генерація в збірці) · мішане (різати на порті). Функції — явною картою `FN`, складені класи — `SAFE`; самоперевірка розбору CSS; ⓘ мертві кандидати `el-*`. **Ф1:** `--values` — засіває `lens/EquipLens_head_valuesLOCK.md` (лише коли файла нема — файл тепер джерело; причини «без лока» — карта `UNLOCKED_*`), `--values --check` — бік стенда: стенд заморожений (ім'я й md5 з шапки), кожен ключ засіву має рядок, нові вироки — ⓘ | `env_check` сам (обидва режими); руками — правив стенд або карту | `python3 tools/stand_inventory.py` · `--list` (кожна одиниця) · `--inject` → «ЗЛОВИВ» · `--values [--check] [--inject]` |
 | `tools/EquipLens_K0_passport_audit.js` | аудит паспорта стенда К0 (самері S17 §4) | правка паспорта стенда | `cd tools && node EquipLens_K0_passport_audit.js` (без аргументу — живий стенд; S36: було зашите ім'я `v17`) |
 
