@@ -5,7 +5,7 @@
 Зараз — лише перша частина: ДЖЕРЕЛО ЧИСЕЛ (рішення Konst 20.11.2026, S37).
 `lens/EquipLens_head_valuesLOCK.md` — єдине джерело значень продукту: народився генерацією зі засіву
 стенда v17_30 (`tools/stand_inventory.py --values`, одноразово — генератор не перезаписує), далі
-правиться рядком §3 лише вироком пристрою. Збірка читає §3 цим розбором і вшиває значення JSON-блоком
+правиться рядком §3 лише вироком пристрою. Збірка читає §3 (і «живі без вироку» §2 — заводське стенда, S39) цим розбором і вшиває значення JSON-блоком
 (ARCH-1: дані — JSON-блоком). Практика: файл у git — єдине джерело, руками пишеться лише він, решта
 генерується; один автор на токен (martinfowler.com «Design Token-Based UI Architecture», 20.11.2026).
 
@@ -36,7 +36,7 @@ RNG = re.compile(r'^(-?[\d.]+)…(-?[\d.]+) · ([\d.]+)$')
 
 
 def parse(text):
-    """§3 → {ключ: значення}; помилки форми — списком (жоден рядок §3 не пропускається мовчки)."""
+    """§3 + «живі без вироку» §2 → {ключ: значення}; помилки форми — списком (жоден рядок §3 не пропускається мовчки)."""
     errs, vals, kinds, edge_calc = [], {}, {}, []
     sec = re.split(r'^## ', text, flags=re.M)
     s3 = next((x for x in sec if x.startswith('§3')), None)
@@ -75,7 +75,24 @@ def parse(text):
     m1 = re.search(r'на межі повзунка: \*\*(\d+)\*\*', text)
     if m1 and int(m1.group(1)) != len(edge_calc):
         errs.append(f'§0 каже «на межі» {m1.group(1)}, за §3 — {len(edge_calc)} — онови §0')
+    # §2 «живий без вироку» — стенд малює їх заводським значенням (стан S без лока), тож і білд: без них полотно білда ≠ стенду
+    # (S39: аврора світлої без `haAL` — детектор «токени ≡ стенду»). Вирок device-раунду переносить рядок у §3.
+    s2 = next((x for x in sec if x.startswith('§2')), '')
+    live = re.findall(r'^\| `(\w+)` \| ([^|]*?) \| \*\*живий без вироку\*\*', s2, re.M)
+    for k, v in live:
+        if k in vals:
+            errs.append(f'§2 {k}: «живий без вироку», але вже є в §3 — прибери з §2')
+            continue
+        try:
+            x = float(v); v = int(x) if x == int(x) and '.' not in v else x; kinds[k] = 'число'
+        except ValueError:
+            kinds[k] = 'вибір'
+        vals[k] = v
+    m2 = re.search(r'живих без вироку (\d+)', text)
+    if m2 and int(m2.group(1)) != len(live):
+        errs.append(f'§0 каже «живих без вироку» {m2.group(1)}, у §2 — {len(live)} — онови §0')
     s1 = next((x for x in sec if x.startswith('§1')), '')
+
     edge_doc = re.findall(r'^\| `(\w+)` \|', s1, re.M)
     for k in sorted(set(edge_calc) - set(edge_doc)):
         errs.append(f'§1 без {k}: вирок на межі повзунка')
