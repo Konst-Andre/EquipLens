@@ -25,7 +25,7 @@ EquipLens/
 │  └─ evidence/       докази вад до примірки (знімки Konst, плівка машини) — оголошено в INDEX, видаляються з закриттям пункту
 ├─ sessions/          живі самері (стеля 2)
 ├─ src/               джерела білда (BUILD-1 Ф2): shell.html (оболонка з мітками) · css/ (5 шарів @layer) · js/ · fonts/ (Manrope-підмножина + OFL, згенеровано tools/fonts.py) · brand/ (SVG гліфа й знака, HTML-кадри іконок) і icons/ (PNG) — згенеровано приладом ядра pwa_icon.py з tools/icon.json (знак-напис — tools/brand.py) · manifest.webmanifest
-├─ docs/              ЗІБРАНИЙ білд — docs/index.html (tools/build.py build; руками не правити). Тека сайту за Р-7: на гілці — так, у main — лише з HOST-1 Б
+├─ docs/              ЗІБРАНИЙ білд — docs/index.html (tools/build.py build; руками не правити). Тека сайту за Р-7: на гілці й у main (правило — `CLAUDE.md` «Гілка»; Pages віддає за /docs/); адресою людей — з HOST-1 Б
 ├─ tools/             стенд з важелями, смоук, прилади, збірка
 ├─ sources/           оригінали (xlsx, zip, фото; fonts/ — Manrope[wght].ttf + OFL, джерело підмножини)
 ├─ archive/           історія: самері · стенди · матриці — не правиться
@@ -54,8 +54,8 @@ EquipLens/
 |---|---|---|
 | `index.html` | браузер | GitHub Pages з кореня `main` — кожен коміт у `main` = деплой |
 | `lens/` · `sessions/` · `tools/` · `*.md` кореня | люди, агент; **але й Pages** — службове поки публікується (проба 19.11: `/lens/EquipLens_CHERGA.md` → 200) | переїзд сайту в `docs/` (Р-7) прибере — вирішує Konst |
-| `tools/EquipLens_headbench_v*.html` | Konst (стенд з важелями, приймання на телефоні) | файл відкривається напряму; у білд ще не портовано (`БІЛД` черги) |
-| `src/` → `docs/index.html` (+ `manifest.webmanifest`, `icons/` — файли за мітками `{{v:…}}`) | збірка → браузер | `tools/build.py build`; `docs/` у `main` — лише разом з HOST-1 Б (воркер `[assets]`), доти Pages віддав би білд ще й з `/docs/` |
+| `tools/EquipLens_headbench_v*.html` | Konst (стенд з важелями, приймання на телефоні) | файл відкривається напряму; у білд портується частинами (`BUILD-1` черги) |
+| `src/` → `docs/index.html` (+ `manifest.webmanifest`, `icons/` — файли за мітками `{{v:…}}`) | збірка → браузер | `tools/build.py build`; `docs/` у `main` — `CLAUDE.md` «Гілка»; адресою людей — з HOST-1 Б (воркер `[assets]`), доти Pages віддав би білд ще й з `/docs/` |
 | `data/` · `media/` | читача в коді не знайдено | не видаляти без вироку Konst (ADOPT «Чого не робити») |
 
 ## Переїзди (старий шлях → новий)
@@ -64,4 +64,4 @@ EquipLens/
 |---|---|---|
 | `lens-governance:products/EquipLens/` | `lens/` · `archive/` | G-Y, 24.09.2026 |
 | сайт у корені | `docs/` (Р-7) | ⬜ — після перемикання Pages Konst |
-| стенд `tools/EquipLens_headbench_v*.html` (один файл) | дерево джерел (`src/`) + збірка в один HTML (`tools/build.py`), значення — із засіву стенда | ⬜ — на `БІЛД` (`lens/BUILD-1_brief.md`), за `lens-governance:kernel/Lens_ARCH-1_brief.md` (К5 тут; канон дерева в ядрі ще не написаний — К2–К3) |
+| стенд `tools/EquipLens_headbench_v*.html` (один файл) | дерево джерел (`src/`) + збірка в один HTML (`tools/build.py`), значення — із засіву стенда | 🔄 — `BUILD-1` (`lens/BUILD-1_brief.md`), за `lens-governance:kernel/Lens_ARCH-1_brief.md` (К5 тут; канон дерева в ядрі ще не написаний — К2–К3) |
