@@ -18,7 +18,7 @@
 
 | файл | що |
 |---|---|
-| `lens/STAND-1_brief.md` | бриф `STAND-1`: стенд до білда |
+| `lens/DES-1_brief.md` | бриф `DES-1`: дизайн і доводка екранів білда (нові екрани + старі пункти стенда з вироками Konst) |
 | `lens/BUILD-1_brief.md` | бриф `BUILD-1`: порт стенда в PWA |
 | `lens/HOST-1_brief.md` | бриф `HOST-1`: Pages → Cloudflare Workers |
 | `lens/BACK-1_brief.md` | бриф `BACK-1`: бекенд і сховище (записи й фото кожного представника, офлайн, вхід) |
