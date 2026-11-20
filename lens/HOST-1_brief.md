@@ -21,7 +21,7 @@
 - [ ] воркер `[assets] directory` = тека сайту (Р-7: `docs/`), `not_found_handling = "single-page-application"`; живий md5 ≡ репо
 - [ ] Workers Builds з `main`, фільтр: документи (`lens/` `sessions/` `tools/` `.claude/` `*.md`) не будять збірку
 - [ ] службове не публікується — проба за вмістом
-- [ ] `tools/env_check.sh`: рядок `cf_budget` ядра повернуто (зараз прибраний з приміткою «EquipLens без Cloudflare» — застаріло з 20.11.2026, воркер є; іспит S37)
+- [x] `tools/env_check.sh`: рядок `cf_budget` ядра повернуто ✅ 20.11.2026 (S38) (зараз прибраний з приміткою «EquipLens без Cloudflare» — застаріло з 20.11.2026, воркер є; іспит S37)
 - [ ] GitHub Pages вимкнено після переходу людей (`CLOUDFLARE.md` п. 11), рядок у реєстрі §3 там же; `tools/env_check.sh` рядок «прод» — на нову адресу
 
 ## §3 Рішення

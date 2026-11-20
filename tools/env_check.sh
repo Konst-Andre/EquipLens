@@ -125,7 +125,8 @@ echo "⚠ версія: мітки ще нема — білда нема, є л�
 
 # Cloudflare — СПІЛЬНИЙ акаунт усіх проєктів: бюджет (запити · збірки · прогноз) і свіжість правил. Рядки «⚠» — читати й діяти
 # за lens-governance:tools/cloudflare/CLOUDFLARE.md. Скрипт лише читає й завжди exit 0. Репо без Cloudflare — прибрати цей рядок, а також c= / cloudflare= у «мережа» і CLOUDFLARE_* у vars вище.
-# EquipLens без Cloudflare — рядок cf_budget прибрано.
+# EquipLens на Cloudflare з S37 (воркер `equiplens`, прев'ю `stand-equiplens` — lens/HOST-1_brief.md): рядок повернуто (іспит S38).
+if [ -f "$K/tools/cloudflare/cf_budget.sh" ]; then bash "$K/tools/cloudflare/cf_budget.sh"; else echo "cloudflare: — (ядра поруч нема: $K)"; fi
 
 [ "${g:-000}" = "000" ] && exit 1
 [ "${fail:-0}" = 1 ] && exit 1   # ✗ спільного інструмента (примірка, версія) — «exit 1 — розібратись до роботи» (CLAUDE.md репо; зразок — lens-governance:tools/claude-code/templates/CLAUDE_template.md)
