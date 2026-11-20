@@ -8,7 +8,7 @@
 
 - **Стан:** як сайт їде в прод зараз — `REPO_LAYOUT.md` «Хто що читає». Konst 19.11.2026: «планую… працювати на Cloudflare Workers… проект перенести на Cloudflare Workers, а не Page з GitHub».
 - **S37, 20.11.2026 — крок А ✅ («так» Konst):** воркер `equiplens` створено разовим `wrangler deploy` з контейнера (тимчасова тека, у репо конфігу ще нема): [equiplens.konstandre.workers.dev](https://equiplens.konstandre.workers.dev/) — заглушка «застосунок збирається» (md5 `b61121f8ffa5`); прев'ю `--preview-alias stand` — стенд `v17_30` (md5 ≡ `tools/`, `78bca64a411c`): [stand-equiplens.konstandre.workers.dev](https://stand-equiplens.konstandre.workers.dev/). Дані стенда вигадані (слово Konst 20.11). Pages не чіпали. Перший деплой дав 10007 на кроці wrangler `workers/workers/<ім'я>` уже після завантаження — повтор пройшов (затримка API на новому воркері).
-- **Далі (Б):** `wrangler.toml` + `docs/` у репо, Workers Builds з `main`, «Посібник» → `archive/`, Pages вимкнути — прод, окремим «так». Було: план переїзду за `lens-governance:tools/cloudflare/CLOUDFLARE.md` §2-б (п. 9–14) → «так» Konst → виконання. **Зараз — лише бриф**: сам переїзд і будь-які налаштування Cloudflare — окремим «так» Konst.
+- **Далі (Б):** конфіг воркера й тека сайту «docs» (Р-7) у репо, Workers Builds з `main`, «Посібник» → `archive/`, Pages вимкнути — прод, окремим «так». Було: план переїзду за `lens-governance:tools/cloudflare/CLOUDFLARE.md` §2-б (п. 9–14) → «так» Konst → виконання. **Зараз — лише бриф**: сам переїзд і будь-які налаштування Cloudflare — окремим «так» Konst.
 - **Чекає Konst:** «так» на план (§5), коли дійде черга.
 
 ## §1 Навіщо
