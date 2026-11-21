@@ -25,7 +25,7 @@ const V = {
     {id:'BC', name:'Б+В', src:'папір Б + рожево-синя аврора В, слабша за В: спокій Б, але скло має що розмивати',
       base:{L:.970, C:.005, H:240}, s:{bg:'all', bgH1L:212, bgH2L:345, bgH3L:262, bgA1L:34, bgA2L:30, bgA3L:24, bgSatL:60, bgLtL:72, bgSpread:120, bgTiltL:2}},
     {id:'M', name:'М\u02bcята', src:'kigen: mint 50 #DFF6EA (основа, приглушена до C .014) · аврора mint 100 #B1E8CE · aqua #9FE2D8 · sky #D1E2F6',
-      base:{L:.962, C:.014, H:165}, s:{bg:'all', bgH1L:152, bgH2L:171, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:80, bgSpread:120, bgTiltL:2}},
+      base:{L:.962, C:.014, H:165}, s:{bg:'all', bgH1L:152, bgH2L:171, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:80, bgSpread:120, bgTiltL:2}, fx:{spec:.74}},   /* v10: острівець М'яти світив на межі (ΔL .031 при порозі .031, check_bg «блиск на склі») — блиск .66 → .74 лише тут */
     {id:'P', name:'Пастель', src:'kigen: нейтральний папір · аврора mint #B1E8CE · lilac #E2D9F3 · blush #F7DDE7 — три пастелі, жодна не головна',
       base:{L:.965, C:.006, H:250}, s:{bg:'all', bgH1L:152, bgH2L:261, bgH3L:337, bgA1L:38, bgA2L:34, bgA3L:28, bgSatL:62, bgLtL:72, bgSpread:125, bgTiltL:2}},
     {id:'S', name:'Шавлія', src:'kigen: Mineral Green (mineral 400 #6D9180, h 164) — основа сіро-зелена, аврора тінню (як Б), але з відтінком м\u02bcяти й бузку',

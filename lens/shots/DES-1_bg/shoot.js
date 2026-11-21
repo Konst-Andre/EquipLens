@@ -1,7 +1,11 @@
 /* живе доки: примірка `DES-1` п.5+6 без вироку Konst (далі — рецепт примірки, SHOTS.md §5).
    Знімальник примірки фону: збирає сторінку (стенд v17_30 + fit_bg.js рядком перед </body>) і знімає екран таба 2 кожного варіанта обох тем.
    Запуск з кореня репо: NODE_PATH=$(npm root -g) node lens/shots/DES-1_bg/shoot.js <тека виводу> [--page-only]
-   Вихід: <тека>/DES-1_bg.html (сторінка для прев'ю) · <тека>/<тема>_<варіант>.png (кадр екрана, 1:1). */
+   Вихід: <тека>/DES-1_bg.html (сторінка для прев'ю) · <тека>/<тема>_<варіант>.png (кадр екрана, 1:1).
+   --engine both (v10, «так з підсиленням» Konst S40 21.11.2026): три проходи в підтеки — chromium/ і webkit/ (та сама ширина й DPR iPhone:
+   розбіжність = вада рушія) · android/ (Chromium із профілем Pixel 7 — розкладка на ширині Android); у кожній — engine.json (проба CSS + рамки).
+   Порівнює check_bg.py --engines <тека>. --engine webkit|chromium — один прохід у корінь теки. Зуб: --inject-engine зсуває острівець лише у WebKit.
+   WebKit ставить гачок старту (lens-governance:tools/claude-code/webkit_ensure.sh); WebKit Linux ≠ Safari iOS — вирок iPhone (lens-governance:kernel/Lens_stagebench_manifest.md §8.18). */
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '../../..');
 const out = path.resolve(process.argv[2] || '.');
@@ -33,14 +37,33 @@ const pagePath = path.join(out, 'DES-1_bg.html');
 fs.writeFileSync(pagePath, page);
 if (process.argv.includes('--page-only')) { console.log('сторінка:', pagePath); process.exit(0); }
 
+const eArg = process.argv.includes('--engine') ? process.argv[process.argv.indexOf('--engine') + 1] : 'chromium';
+const PASSES = eArg === 'both' ? [['chromium', 'iPhone 13', 'chromium'], ['webkit', 'iPhone 13', 'webkit'], ['chromium', 'Pixel 7', 'android']]
+  : [[eArg, 'iPhone 13', '']];
 (async () => {
-  const { chromium, devices } = require('playwright');
-  const b = await chromium.launch();
-  const ctx = await b.newContext({ ...devices['iPhone 13'], viewport: {width: 390, height: 1000}, deviceScaleFactor: 1 });   // висота — щоб кадр 812 цілий під панеллю кнопок
+  const pw = require('playwright'); let bad = 0;
+  for (const [eng, dev, sub] of PASSES) { console.log(`── ${sub || eng} · ${dev} ──`); bad += await shoot(pw, eng, dev, path.join(out, sub)); }
+  process.exit(bad ? 1 : 0);
+})();
+
+async function shoot(pw, eng, dev, out) {
+  fs.mkdirSync(out, {recursive: true});
+  const b = await pw[eng].launch();
+  const d0 = pw.devices[dev];
+  const ctx = await b.newContext({ ...d0, viewport: {width: d0.viewport.width, height: 1000}, deviceScaleFactor: 1 });   // висота — щоб кадр 812 цілий під панеллю кнопок; ширина — пристрою (iPhone 390 · Pixel 7 412)
   const p = await ctx.newPage();
   const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto('file://' + pagePath); await p.waitForTimeout(800);
   await p.evaluate(() => document.getElementById('zOne').click()); await p.waitForTimeout(300);   // масштаб 1:1 — скло судиться лише на 1:1 (wsd 2.14)
+  if (eng === 'webkit' && process.argv.includes('--inject-engine')) await p.addStyleTag({content: '#sbox .el-nav{translate:6px 0}'});   // зуб: CSS, що діє лише в одному рушії
+  /* проба підтримки CSS рушієм: скло стенда — backdrop-filter; iOS 18 не застосовує -webkit-backdrop-filter зі змінною (bugs.webkit.org 289149) */
+  const css = await p.evaluate(() => { const e = document.createElement('div'); document.body.appendChild(e); e.style.setProperty('--b', '4px');
+    e.style.setProperty('-webkit-backdrop-filter', 'blur(var(--b))'); e.style.setProperty('backdrop-filter', 'blur(var(--b))');
+    const cs = getComputedStyle(e), nv = getComputedStyle(document.querySelector('#sbox .el-nav'));
+    const r = {backdrop: CSS.supports('backdrop-filter', 'blur(2px)'), webkitBackdrop: CSS.supports('-webkit-backdrop-filter', 'blur(2px)'),
+      varBlur: cs.backdropFilter || cs.webkitBackdropFilter || '', nav: nv.backdropFilter || nv.webkitBackdropFilter || '', ua: navigator.userAgent};
+    e.remove(); return r; });
+  console.log('CSS:', JSON.stringify({...css, ua: undefined}));
   /* панель примірки не з'їдає екран телефона: ≤ 140 px (пропуск Konst S40 — пояснення абзацом займало верх екрана; тепер за «i»).
      Зуб: --inject-panel розкриває пояснення → ✗ мусить з'явитись. */
   if (process.argv.includes('--inject-panel')) await p.evaluate(() => { document.querySelector('#fit .fs').hidden = false; });
@@ -91,6 +114,8 @@ if (process.argv.includes('--page-only')) { console.log('сторінка:', pag
     await p.locator('#sbox').screenshot({ path: path.join(out, `${theme}_${id}_bg.png`) });
     await p.evaluate(() => document.getElementById('notext').remove());
   }
+  const frames = {}; for (const theme of ['light', 'dark']) frames[theme] = JSON.parse(fs.readFileSync(path.join(out, `${theme}_${V[theme][0]}_glass.json`), 'utf8'));
+  fs.writeFileSync(path.join(out, 'engine.json'), JSON.stringify({engine: eng, device: dev, width: d0.viewport.width, css, frames, errs}));
   console.log('кадрів:', shots.length, '· помилок сторінки:', errs.length); errs.forEach(e => console.log('✗', e));
-  await b.close(); process.exit(errs.length ? 1 : 0);
-})();
+  await b.close(); return errs.length;
+}

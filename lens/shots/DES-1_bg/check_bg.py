@@ -18,7 +18,9 @@
 v8 — «блиск на склі» (розбір v7 п.6): ΔL OKLab між верхньою лівою смугою скла (острівець · «+» · капсула) і нижньою правою, кадр без тексту;
   варіант з «Відблиском» мусить світити сильніше за «зараз» (поріг GLASS_T). Зуб: --inject-glass вирівнює скло першого варіанта світлої → ✗.
   --json <файл> — короткий рядок чисел кожного варіанта для «i» панелі (shoot.js кладе їх у сторінку).
-Запуск: python3 lens/shots/DES-1_bg/check_bg.py <тека> [--inject | --inject-glass] [--json <тека>/metrics.json]
+v10 — «деформація» світлої: нерівність краю картки вздовж верху (ALONG_T). Зуб: --inject-bend малює дугу, що гасне вздовж краю, у першому варіанті світлої → ✗.
+Запуск: python3 lens/shots/DES-1_bg/check_bg.py <тека> [--inject | --inject-glass | --inject-rim | --inject-bend] [--json <тека>/metrics.json]
+        python3 lens/shots/DES-1_bg/check_bg.py --engines <тека shoot.js --engine both> [--inject-engine]   (рушії: Chromium ⟂ WebKit + Android; ENGINE_T · FRAME_T)
 """
 import json, math, sys, os, re
 from PIL import Image
@@ -74,9 +76,12 @@ def glass(d, theme, vid, flat=False):
         out[g['q']] = 0.0 if flat else tl - br
     return out
 
-def rim(d, theme, vid, inj=False):
+def rim(d, theme, vid, inj=False, bend=False):
     """v9 (Konst v8 на iPhone: кант «грубо… кричить», у темній «не виражено»): край картки (зовнішні 2 px) проти смуги 4–7 px усередині.
-    loud — найбільша |ΔL| серед чотирьох сторін; tint — найбільший приріст кольоровості краю (кольоровий контур); vis — ΔL верху й ліва (блиск з джерела)."""
+    loud — найбільша |ΔL| серед чотирьох сторін; tint — найбільший приріст кольоровості краю (кольоровий контур); vis — ΔL верху й ліва (блиск з джерела);
+    along — v10 «деформація»: ΔL краю у 8 сегментах верхньої сторони, max − min (блиск, що гасне вздовж краю, гне тіло — Konst v9 на iPhone;
+    блиск під «не тим» кутом око читає як нахил — androidauthority.com/liquid-glass-vertigo-3598657, рецепт — рівний inset 0 1px 0, 21.11.2026).
+    Межа: смужка з прозорими кінцями (симетрично гасне) теж дасть велике along — у v10 її нема."""
     f = os.path.join(d, f'{theme}_{vid}_glass.json')
     if not os.path.exists(f): return None
     im = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB'); px = im.load(); W, H = im.size
@@ -90,6 +95,11 @@ def rim(d, theme, vid, inj=False):
                 for y in (y0, y0 + 1, y1, y1 - 1): px[x, y] = (150, 90, 200)
             for y in range(y0, y1 + 1):
                 for x in (x0, x0 + 1, x1, x1 - 1): px[x, y] = (150, 90, 200)
+        if bend:   # зуб --inject-bend: дуга блиску, що гасне зліва направо вздовж верхнього краю (як v9 світлої)
+            for x in range(x0, x1 + 1):
+                a = 1 - 2 * (x - x0) / (x1 - x0)   # +1 зліва → −1 справа: світла дуга зліва, тихе темне ребро справа
+                for y in (y0, y0 + 1):
+                    c = px[x, y]; px[x, y] = tuple(int(v + (255 - v) * 0.9 * a) if a > 0 else int(v * (1 + 0.12 * a)) for v in c)
         r = 24   # кути не міряємо — радіус картки
         def band(side, a, b):
             pts = []
@@ -103,11 +113,15 @@ def rim(d, theme, vid, inj=False):
         for side in 'tblr':
             (le, ce), (li, ci) = band(side, 0, 2), band(side, 4, 7)
             sd[side] = (le - li, ce - ci)
-        res.append(dict(loud=max(abs(v[0]) for v in sd.values()), tint=max(v[1] for v in sd.values()), vis=max(sd['t'][0], sd['l'][0]), asym=abs(sd['l'][0] - sd['r'][0])))
+        xs = list(range(x0 + r, x1 - r)); n = len(xs) // 8
+        seg = lambda a, b, s: sum(oklab(px[(x, y0 + k)])[0] for x in xs[s * n:(s + 1) * n] for k in range(a, b)) / (n * (b - a))
+        tops = [seg(0, 2, s) - seg(4, 7, s) for s in range(8)]
+        res.append(dict(loud=max(abs(v[0]) for v in sd.values()), tint=max(v[1] for v in sd.values()), vis=max(sd['t'][0], sd['l'][0]), along=max(tops) - min(tops)))
     if not res: return None
-    return {k: max(x[k] for x in res) for k in ('loud', 'tint', 'vis', 'asym')}
+    return {k: max(x[k] for x in res) for k in ('loud', 'tint', 'vis', 'along')}
 
-ASYM_T = 0.010   # v10 світла: лівий і правий край картки різні (дуга з одного боку) — «деформує тіло» (Konst v9 на iPhone); понад «зараз» ≤ ASYM_T
+ALONG_T = 0.010   # v10 світла, «деформує тіло» (Konst v9 на iPhone): нерівність краю вздовж верху понад «зараз» ≤ ALONG_T. Калібровано 21.11.2026 (Chromium, 1:1):
+                 # v9 світла .042–.066 (понад «зараз» .023 — від +.019) → ✗; v10 .005–.022 → ✓. Відкинуто: «ліво ⟂ право» (v9 .024 < стенд .049) і «верх ⟂ боки» (v9 +.030 ≈ v10 +.027) — ваду не бачать
 LOUD_T, TINT_T, VIS_T = 0.045, 0.012, 0.015   # v9, понад «зараз»: гучність ≤ LOUD_T, кольоровість ≤ TINT_T, блиск ≥ VIS_T. Калібровано на v8 (Konst на iPhone): світла L3 колір +.014 → ✗ «кольоровий контур»; темна D7 блиск +.013 → ✗ «не видно» (REVIEW_v7.md п.12)
 
 def judge(d, theme, vid, inject=False):
@@ -163,22 +177,19 @@ def judge(d, theme, vid, inject=False):
             labs.append((L, A, B))
     return dict(chip=chip, worst=worst, sun=worst_sun, glare=worst_glare, yellow=yel / tot, labs=labs)
 
-def main():
-    d = sys.argv[1]
-    inject = '--inject' in sys.argv
-    inj_glass = '--inject-glass' in sys.argv
-    inj_rim = '--inject-rim' in sys.argv
-    jout = sys.argv[sys.argv.index('--json') + 1] if '--json' in sys.argv else None
-    M = {}
-    bad = 0
+DATA = {}   # числа останнього run(): {тема: {варіант: {cr, need, sun, glass, rim, marks}}} — для --engines
+
+def run(d, inject=False, inj_glass=False, inj_rim=False, inj_bend=False, jout=None):
+    M = {}; DATA.clear()
+    bad = 0; hit = 0   # hit — ✗ саме підкинутого варіанта (ids[1]): наявне ✗ іншого варіанта (М'ята .031) не робить зуб «справжнім»
     for theme in ('light', 'dark'):
         ids = sorted({f.split('_')[1].split('.')[0] for f in os.listdir(d) if f.startswith(theme + '_') and f.endswith('.json')},
                      key=lambda v: (v != 'now', v))
         res = {v: judge(d, theme, v, inject and theme == 'light' and v == ids[1]) for v in ids}
         base = res['now']
         gl = {v: glass(d, theme, v, inj_glass and theme == 'light' and v == ids[1]) for v in ids}
-        rm = {v: rim(d, theme, v, inj_rim and v == ids[1]) for v in ids}
-        M[theme] = {}
+        rm = {v: rim(d, theme, v, inj_rim and v == ids[1], inj_bend and theme == 'light' and v == ids[1]) for v in ids}
+        M[theme] = {}; DATA[theme] = {}
         print(f'── {"світла" if theme == "light" else "темна"} ──')
         for v in ids:
             r = res[v]
@@ -203,9 +214,11 @@ def main():
                 a, b0 = rm[v], rm['now']
                 if a['loud'] - b0['loud'] > LOUD_T: marks.append(f'✗ кант кричить (ΔL {a["loud"]:.3f}, «зараз» {b0["loud"]:.3f})'); bad += 1
                 if a['tint'] - b0['tint'] > TINT_T: marks.append(f'✗ кольоровий контур (ΔC {a["tint"]:.3f}, «зараз» {b0["tint"]:.3f})'); bad += 1
-                if theme == 'light' and a['asym'] - b0['asym'] > ASYM_T: marks.append(f'✗ кант деформує тіло (ліво ⟂ право ΔL {a["asym"]:.3f}, «зараз» {b0["asym"]:.3f})'); bad += 1
+                if theme == 'light' and a['along'] - b0['along'] > ALONG_T: marks.append(f'✗ кант деформує тіло (нерівний уздовж верху ΔL {a["along"]:.3f}, «зараз» {b0["along"]:.3f})'); bad += 1
                 if theme == 'dark' and a['vis'] - b0['vis'] < VIS_T: marks.append(f'✗ блиску канта не видно (ΔL {a["vis"]:.3f}, «зараз» {b0["vis"]:.3f})'); bad += 1
-            rtxt = f'кант гучн {rm[v]["loud"]:.3f} колір {rm[v]["tint"]:+.3f} блиск {rm[v]["vis"]:+.3f} асим {rm[v]["asym"]:.3f}' if rm[v] else ''
+            DATA[theme][v] = dict(cr=w['cr'], need=w['need'], sun=r['sun'][0], glass=gl[v] or {}, rim=rm[v] or {}, marks=marks)
+            if v == ids[1] and marks and (inject or inj_glass or inj_bend and theme == 'light' or inj_rim): hit += 1
+            rtxt = f'кант гучн {rm[v]["loud"]:.3f} колір {rm[v]["tint"]:+.3f} блиск {rm[v]["vis"]:+.3f} вздовж {rm[v]["along"]:.3f}' if rm[v] else ''
             gtxt = ' '.join(f'{q.split("-")[-1]} {dl:+.3f}' for q, dl in gl[v].items())
             M[theme][v] = f'контраст {w["cr"]} (поріг {w["need"]}) · на сонці {r["sun"][0]:.2f} · ΔE від «Зараз» {de:.3f}' + (f' · блиск скла {gtxt}' if gtxt else '') + (f' · {rtxt}' if rtxt else '')
             print(f'  {v:4} [{rtxt}] блиск скла [{gtxt}] · контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
@@ -214,12 +227,65 @@ def main():
         near = [(min((dist(v, u), u) for u in ids if u != v), v) for v in ids if len(ids) > 2]
         close = sorted({tuple(sorted((v, u))) + (round(d, 4),) for (d, u), v in near if d < 0.008})
         print('  сусід (найближчий): ' + ' · '.join(f'{v}→{u} {d:.3f}' for (d, u), v in near) + ('' if not close else '   ⚠ майже одне: ' + ', '.join(f'{a}≈{b} ({d})' for a, b, d in close)))
-    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else '') + ('  [--inject-glass]' if inj_glass else '') + ('  [--inject-rim]' if inj_rim else ''))
+    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else '') + ('  [--inject-glass]' if inj_glass else '') + ('  [--inject-rim]' if inj_rim else '') + ('  [--inject-bend]' if inj_bend else ''))
     if jout:
         json.dump(M, open(jout, 'w', encoding='utf-8'), ensure_ascii=False); print('числа для «i»:', jout)
-    if inject or inj_glass or inj_rim:
-        print('ЗЛОВИВ' if bad else 'НЕ ЗЛОВИВ — у приладу нема зубів'); return 0 if bad else 1
+    if inject or inj_glass or inj_rim or inj_bend:
+        print('ЗЛОВИВ' if hit else 'НЕ ЗЛОВИВ — у приладу нема зубів (✗ підкинутого варіанта нема)'); return 0 if hit else 1
     return 1 if bad else 0
+
+ENGINE_T = {'glass': 0.020, 'rim': 0.028, 'cr': 0.48, 'sun': 0.10}   # розбіжність Chromium ⟂ WebKit на тій самій ширині й DPR iPhone — понад це ✗ «вада рушія».
+# Поріг = max |Δ| першого прогону ×1.5 (v10, 21.11.2026, Playwright 1.63: Chromium ⟂ WebKit 26.6, 1:1): glass .013 · rim .019 · cr .32 · sun .067 —
+# системна різниця відтворення blur/saturate у темній (WebKit контрастніший), не CSS одного рушія; переглянути з новим рушієм. Ловить нове поверх цього шуму.
+FRAME_T = 1.0   # рамки ключових елементів (острівець · «+» · капсула · картки), px
+
+def engines(d):
+    """--engines <тека shoot.js --engine both>: судді на кожному проході + Chromium ⟂ WebKit (міри, рамки, вирок) + Android (судді, рамки).
+    Вирок, що різниться між рушіями, а значення в межах ENGINE_T від порога, — ⚠ «на межі рушія», не ✗ (поріг лежить у шумі рушія)."""
+    import contextlib, io
+    R, E = {}, {}
+    for sub in ('chromium', 'webkit', 'android'):
+        with contextlib.redirect_stdout(io.StringIO()): code = run(os.path.join(d, sub))
+        R[sub] = json.loads(json.dumps(DATA)); E[sub] = json.load(open(os.path.join(d, sub, 'engine.json'), encoding='utf-8'))
+        print(f'{sub:8} {E[sub]["device"]:9} ширина {E[sub]["width"]} · судді: ' + ('✓' if not code else f'є ✗ (python3 {sys.argv[0]} {os.path.join(d, sub)})')
+              + f' · CSS backdrop {E[sub]["css"]["backdrop"]} -webkit- {E[sub]["css"]["webkitBackdrop"]} змінна «{E[sub]["css"]["varBlur"]}» острівець «{E[sub]["css"]["nav"]}»')
+    bad, warn, mx = 0, 0, {k: 0.0 for k in ENGINE_T}
+    c, w = R['chromium'], R['webkit']
+    for theme in c:
+        for v in c[theme]:
+            a, b = c[theme][v], w[theme].get(v)
+            if not b: print(f'  ✗ {theme}/{v}: у WebKit нема варіанта'); bad += 1; continue
+            diffs = [('cr', a['cr'], b['cr']), ('sun', a['sun'], b['sun'])] + [('glass', a['glass'][q], b['glass'].get(q, 0)) for q in a['glass']] \
+                    + [('rim', a['rim'][k], b['rim'].get(k, 0)) for k in a['rim']]
+            for k, x, y in diffs:
+                mx[k] = max(mx[k], abs(x - y))
+                if abs(x - y) > ENGINE_T[k]: print(f'  ✗ вада рушія {theme}/{v} {k}: Chromium {x:.3f} ⟂ WebKit {y:.3f} (Δ {abs(x - y):.3f} > {ENGINE_T[k]})'); bad += 1
+            if bool(a['marks']) != bool(b['marks']):
+                print(f'  ⚠ на межі рушія {theme}/{v}: ' + ('Chromium ' + '; '.join(a['marks']) if a['marks'] else 'WebKit ' + '; '.join(b['marks'])) + ' — міри в межах ENGINE_T, вирок за порогом різниться → вирішує iPhone'); warn += 1
+    print('  Chromium ⟂ WebKit max |Δ|: ' + ' · '.join(f'{k} {v:.3f} (поріг {ENGINE_T[k]})' for k, v in mx.items()))
+    for theme in ('light', 'dark'):
+        fc = {g['q']: g for g in E['chromium']['frames'][theme]}
+        for g in E['webkit']['frames'][theme]:
+            f = fc.get(g['q'])
+            dd = max(abs(f[k] - g[k]) for k in ('x', 'y', 'w', 'h')) if f else 99
+            if dd > FRAME_T: print(f'  ✗ рамка {theme} {g["q"]}: Chromium ⟂ WebKit Δ {dd:.1f} px > {FRAME_T}'); bad += 1
+        an = {g['q']: g for g in E['android']['frames'][theme]}; W0, W1 = E['chromium']['width'], E['android']['width']
+        lay = ' · '.join(f'{q} {an[q]["w"]:.0f}×{an[q]["h"]:.0f}' for q in ('.el-nav', '.el-fab', 'card1') if q in an)
+        same = all(abs(an[q][k] - fc[q][k]) <= FRAME_T for q in an if q in fc for k in ('x', 'w'))
+        # стенд малює екран фіксованої ширини (рамка #sbox, 375 px) — розкладку на ширині Android побачить білд PWA (BUILD-1), не стенд (заміряно 21.11.2026)
+        print(f'  Android {theme} (вікно {W1} px ⟂ iPhone {W0}): {lay}' + (' — екран стенда фіксованої ширини, розкладка ≡ iPhone; ширину Android судить білд' if same else ' — розкладка інша, ніж на iPhone: перевір'))
+    nA = sum(bool(x['marks']) for t_ in R['android'].values() for v, x in t_.items() if v != 'now')
+    if nA: print(f'  ✗ Android: судді дали ✗ — {nA} варіант(ів)'); bad += nA
+    print(f'─── РУШІЇ: ✗ {bad} · ⚠ на межі рушія {warn} ───')
+    return 1 if bad else 0
+
+def main():
+    if '--engines' in sys.argv:
+        r = engines(sys.argv[sys.argv.index('--engines') + 1])
+        if '--inject-engine' in sys.argv: print('ЗЛОВИВ' if r else 'НЕ ЗЛОВИВ — розбіжність рушія не видно'); return 0 if r else 1
+        return r
+    a = sys.argv
+    return run(a[1], '--inject' in a, '--inject-glass' in a, '--inject-rim' in a, '--inject-bend' in a, a[a.index('--json') + 1] if '--json' in a else None)
 
 if __name__ == '__main__':
     sys.exit(main())
