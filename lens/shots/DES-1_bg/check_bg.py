@@ -15,7 +15,10 @@
  4. РІЗНИЦЯ — середня відстань OKLab кадру без тексту від «зараз»: < 0.006 — варіант на телефоні не відрізнити (✗).
  5. СУСІД — відстань до найближчого іншого варіанта тієї ж теми: < 0.008 — два варіанти майже одне (⚠, не ✗: вибір звужує Konst; v6, Konst 21.11 «дай більше цікавого вибору»).
 Зуби: --inject підкидає жовтий фон і блідий текст у перший варіант світлої → ✗ мусить з'явитись.
-Запуск: python3 lens/shots/DES-1_bg/check_bg.py <тека> [--inject]
+v8 — «блиск на склі» (розбір v7 п.6): ΔL OKLab між верхньою лівою смугою скла (острівець · «+» · капсула) і нижньою правою, кадр без тексту;
+  варіант з «Відблиском» мусить світити сильніше за «зараз» (поріг GLASS_T). Зуб: --inject-glass вирівнює скло першого варіанта світлої → ✗.
+  --json <файл> — короткий рядок чисел кожного варіанта для «i» панелі (shoot.js кладе їх у сторінку).
+Запуск: python3 lens/shots/DES-1_bg/check_bg.py <тека> [--inject | --inject-glass] [--json <тека>/metrics.json]
 """
 import json, math, sys, os, re
 from PIL import Image
@@ -49,6 +52,25 @@ def parse_color(s):
     if s.startswith('color(srgb'):
         return (n[0] * 255, n[1] * 255, n[2] * 255, n[3] if len(n) > 3 else 1.0)
     raise ValueError('невідомий формат кольору: ' + s)
+
+GLASS_T = 0.012   # ΔL OKLab: блиск на склі видно, коли верх-ліво світліше за низ-право на стільки більше, ніж у «зараз» (заміряно v8 S40 — див. REVIEW_v7.md п.6)
+
+def glass(d, theme, vid, flat=False):
+    """ΔL верхньої лівої смуги скла мінус нижньої правої для кожної рамки з <тема>_<варіант>_glass.json (кадр без тексту)."""
+    f = os.path.join(d, f'{theme}_{vid}_glass.json')
+    if not os.path.exists(f):
+        return {}
+    im = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB'); px = im.load(); W, H = im.size
+    out = {}
+    for g in json.load(open(f, encoding='utf-8')):
+        x0, y0, w, h = int(g['x']) + 3, int(g['y']) + 3, int(g['w']) - 6, int(g['h']) - 6
+        if w < 8 or h < 8 or x0 < 0 or y0 < 0 or x0 + w > W or y0 + h > H:
+            continue
+        mean = lambda xa, xb, ya, yb: sum(oklab(px[x, y])[0] for y in range(ya, yb) for x in range(xa, xb)) / max(1, (xb - xa) * (yb - ya))
+        tl = mean(x0, x0 + w // 2, y0, y0 + max(2, h * 3 // 10))
+        br = mean(x0 + w // 2, x0 + w, y0 + h * 6 // 10, y0 + h)
+        out[g['q']] = 0.0 if flat else tl - br
+    return out
 
 def judge(d, theme, vid, inject=False):
     bg = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB')
@@ -106,12 +128,17 @@ def judge(d, theme, vid, inject=False):
 def main():
     d = sys.argv[1]
     inject = '--inject' in sys.argv
+    inj_glass = '--inject-glass' in sys.argv
+    jout = sys.argv[sys.argv.index('--json') + 1] if '--json' in sys.argv else None
+    M = {}
     bad = 0
     for theme in ('light', 'dark'):
         ids = sorted({f.split('_')[1].split('.')[0] for f in os.listdir(d) if f.startswith(theme + '_') and f.endswith('.json')},
                      key=lambda v: (v != 'now', v))
         res = {v: judge(d, theme, v, inject and theme == 'light' and v == ids[1]) for v in ids}
         base = res['now']
+        gl = {v: glass(d, theme, v, inj_glass and theme == 'light' and v == ids[1]) for v in ids}
+        M[theme] = {}
         print(f'── {"світла" if theme == "light" else "темна"} ──')
         for v in ids:
             r = res[v]
@@ -126,14 +153,24 @@ def main():
                 marks.append(f'✗ жовтизна {r["yellow"]*100:.1f} %'); bad += 1
             if v != 'now' and de < 0.006:
                 marks.append(f'✗ не відрізнити від «зараз» (ΔE {de:.4f})'); bad += 1
-            print(f'  {v:4} контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
+            if v != 'now' and gl[v]:
+                for q, dl in gl[v].items():
+                    n0 = gl['now'].get(q, 0)   # скло, що в «зараз» уже світить (ΔL ≥ 3·поріг, напр. «+» стенда .070), — лише не тьмяніти; неосвітлене — засвітитись
+                    need = n0 - 0.005 if n0 >= 3 * GLASS_T else max(n0 + GLASS_T, GLASS_T)
+                    if dl < need:
+                        marks.append(f'✗ блиску на склі нема ({q} ΔL {dl:.3f} < {need:.3f})'); bad += 1
+            gtxt = ' '.join(f'{q.split("-")[-1]} {dl:+.3f}' for q, dl in gl[v].items())
+            M[theme][v] = f'контраст {w["cr"]} (поріг {w["need"]}) · на сонці {r["sun"][0]:.2f} · ΔE від «Зараз» {de:.3f}' + (f' · блиск скла {gtxt}' if gtxt else '')
+            print(f'  {v:4} блиск скла [{gtxt}] · контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
                   f' · жовтизна {r["yellow"]*100:.2f} % · ΔE від «зараз» {de:.4f} · (чіп/бейдж мін {r["chip"][0]:.2f} «{r["chip"][1]}»)  ' + ('  '.join(marks) if marks else '✓'))
         dist = lambda x, y: sum(math.dist(p, q) for p, q in zip(res[x]['labs'], res[y]['labs'])) / len(res[x]['labs'])
         near = [(min((dist(v, u), u) for u in ids if u != v), v) for v in ids if len(ids) > 2]
         close = sorted({tuple(sorted((v, u))) + (round(d, 4),) for (d, u), v in near if d < 0.008})
         print('  сусід (найближчий): ' + ' · '.join(f'{v}→{u} {d:.3f}' for (d, u), v in near) + ('' if not close else '   ⚠ майже одне: ' + ', '.join(f'{a}≈{b} ({d})' for a, b, d in close)))
-    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else ''))
-    if inject:
+    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else '') + ('  [--inject-glass]' if inj_glass else ''))
+    if jout:
+        json.dump(M, open(jout, 'w', encoding='utf-8'), ensure_ascii=False); print('числа для «i»:', jout)
+    if inject or inj_glass:
         print('ЗЛОВИВ' if bad else 'НЕ ЗЛОВИВ — у приладу нема зубів'); return 0 if bad else 1
     return 1 if bad else 0
 

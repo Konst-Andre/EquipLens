@@ -36,7 +36,7 @@ const V = {
     {id:'L1', name:'Лагуна', src:'аква · бірюза · м\u02bcята (kigen aqua 100 #9FE2D8 · mint 100): морська вода на мілині', base:{L:.962, C:.012, H:195},
       s:{bg:'all', bgH1L:171, bgH2L:195, bgH3L:152, bgA1L:34, bgA2L:30, bgA3L:22, bgSatL:58, bgLtL:74, bgSpread:120, bgTiltL:2}},
     {id:'L2', name:'Лаванда й м\u02bcята', src:'бузок (kigen lilac 100 #E2D9F3) · м\u02bcята · блакить — прохолодно, без рожевого', base:{L:.966, C:.008, H:280},
-      s:{bg:'all', bgH1L:261, bgH2L:152, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:76, bgSpread:120, bgTiltL:2}, fx:{irid:.12}},
+      s:{bg:'all', bgH1L:261, bgH2L:152, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:76, bgSpread:120, bgTiltL:2}, fx:{irid:.12, card:40}},
     {id:'L3', name:'Перлина', src:'перламутр: три бліді відтінки (м\u02bcята · блакить · бузок) + сильний відблиск і райдужна плівка — показ третього шару', base:{L:.972, C:.006, H:260},
       s:{bg:'all', bgH1L:171, bgH2L:230, bgH3L:280, bgA1L:26, bgA2L:24, bgA3L:20, bgSatL:50, bgLtL:80, bgSpread:125, bgTiltL:2}, fx:{rim:1, top:.7, bot:.6, side:.38, irid:.14}},
     {id:'L4', name:'Морозна м\u02bcята', src:'м\u02bcята з крижаною блакиттю, основа холодніша', base:{L:.968, C:.010, H:180},
@@ -57,7 +57,7 @@ const V = {
     {id:'L11', name:'Льодовик', src:'насичена крижана блакить і ціан, найхолодніший', base:{L:.962, C:.014, H:220},
       s:{bg:'all', bgH1L:195, bgH2L:210, bgH3L:180, bgA1L:38, bgA2L:32, bgA3L:24, bgSatL:64, bgLtL:72, bgSpread:120, bgTiltL:2}, fx:{top:.7, bot:.65}},
     {id:'L12', name:'Сутінки', src:'бузково-блакитні сутінки, глибші за Лаванду', base:{L:.966, C:.012, H:275},
-      s:{bg:'all', bgH1L:250, bgH2L:270, bgH3L:200, bgA1L:38, bgA2L:32, bgA3L:24, bgSatL:54, bgLtL:75, bgSpread:120, bgTiltL:2}, fx:{side:.40}},
+      s:{bg:'all', bgH1L:250, bgH2L:270, bgH3L:200, bgA1L:38, bgA2L:32, bgA3L:24, bgSatL:54, bgLtL:75, bgSpread:120, bgTiltL:2}, fx:{side:.40, card:40}},
   ],
   dark: [
     {id:'now', name:'Зараз', src:'стенд v17_30: майже чорна основа (dkH 250 · C 7 · L 6) + синьо-фіолетова аврора', s:{}},
@@ -97,7 +97,10 @@ window.applyVars = function(){
    Тепер два носії: (а) світло-рамка у фоні — смуга під шапкою, смуга під острівцем (у px, як гібрид стенда: haY · haYB), бічні світіння посередині;
    (б) світний кант на склі (картки · острівець · «+» · капсула шапки): яскраве ребро з боку світла, кут світла `--la` повертається під час прокрутки — блиск ковзає по ребру.
    «Зараз» — без шару (база машини); перемикач «Відблиск» вимикає обидва носії. */
-const FX0 = {light:{top:.55, bot:.50, side:.30, rim:.95, irid:0}, dark:{top:.16, bot:.16, side:.10, rim:.50, irid:0}};
+/* v8 (розбір v7 п.5–6, 10): spec — блиск НА склі острівця, «+» і капсули шапки (внутрішня оболонка під вмістом: isolation + z-index:-1 — codepen «liquid glass button»,
+   dev.to «Apple liquid glass with CSS», 21.11.2026; не SVG-заломлення — важке на старих телефонах); card — прозорість тла картки світлої (стенд cdAL 45 → менше:
+   картка бере колір аврори, а не лишається «папером»; суддя контрасту вирішує, скільки можна). */
+const FX0 = {light:{top:.55, bot:.50, side:.30, rim:.95, irid:0, spec:.66, card:34}, dark:{top:.16, bot:.16, side:.10, rim:.50, irid:0, spec:.20, card:null}};
 let fxOn = true;
 const aur0 = aurLayers;
 function fxOf(dark){ const v = V[cur.theme].find(x => x.id === cur.id) || {}; return (!fxOn || (v.id === 'now' && !v.fx)) ? null : Object.assign({}, FX0[dark ? 'dark' : 'light'], v.fx || {}); }
@@ -123,12 +126,16 @@ window.aurLayers = function(dark){
     L.push(`conic-gradient(from 210deg at 28% 72%, ${c(160)}, ${c(195)}, ${c(235)}, ${c(275)}, ${c(160)})`); }
   return L.concat(b).join(',');   // перший шар малюється зверху
 };
-const GLASS = '.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-act';
-function rimSync(){ const dk = effTheme() === 'dark', f = fxOf(dk); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f){ sbox.style.setProperty('--ra', f.rim); sbox.style.setProperty('--rimEnd', dk ? 'transparent' : hsl(S.bgH3L, 45, 52, '.40')); } }
+/* v7 мав тут `.el-act` — це кнопки свайпу ПІД карткою (заміряно S40: 63×79 у рядку картки), а капсула шапки — `.el-hgrp` (розбір v7 п.10) */
+const GLASS = '.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-hgrp';
+function rimSync(){ const dk = effTheme() === 'dark', f = fxOf(dk); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f){ sbox.style.setProperty('--ra', f.rim); sbox.style.setProperty('--rimEnd', dk ? 'transparent' : hsl(S.bgH3L, 45, 52, '.40'));
+    sbox.style.setProperty('--sa', f.spec || 0);   /* блиск угорі зліва — те саме джерело, що кант */
+    sbox.style.setProperty('--sb', dk ? hsl(S.bgH1D, 70, 62, ((f.spec || 0) * .5).toFixed(3)) : hexA(oklchHex(.60, .07, S.bgH1L), (f.spec || 0) * .8)); } }   /* OKLCH, не HSL: однакова сприйнята світлота відсвіту для м'яти й бузку (HSL L58 у м'яти світліший — острівець м'ятних не світив, v8) */   /* знизу — відсвіт аврори крізь скло (каустика). Світла: середній тон, не світлий — білий блиск на білому склі не видно (суддя «блиск на склі» v8: ΔL острівця .017–.024 ≈ «зараз» .019); край світлого скла читається темнішим заломленням знизу */
 function pick(theme, id){
   Object.keys(S).forEach(k => { S[k] = NOW[k]; });
   cur = {theme, id};
   Object.assign(S, (V[theme].find(x => x.id === id) || {}).s || {});
+  { const f = fxOf(theme === 'dark'); if (f && f.card != null) S.cdAL = f.card; }   /* розбір v7 п.5: картка світлої прозоріша — лише з «Відблиском», щоб перемикач показував до/після */
   themeMode = theme; tab = 'ph';
   render(); rimSync();
   const bar = document.getElementById('fit'), v = V[theme].find(x => x.id === id) || {};
@@ -138,7 +145,8 @@ function pick(theme, id){
   sel.innerHTML = V[theme].map((x, n) => `<option value="${x.id}"${x.id===id ? ' selected' : ''}>${typeof top !== 'undefined' && top.includes(theme + ':' + x.id) ? '★ ' : ''}${n + 1}/${V[theme].length} · ${x.name}</option>`).join('');
   bar.querySelector('.fxb').setAttribute('aria-pressed', String(fxOn));
   const key = theme + ':' + id, st = bar.querySelector('.fstar'); if (st && typeof top !== 'undefined'){ st.textContent = top.includes(key) ? '★' : '☆'; st.setAttribute('aria-pressed', String(top.includes(key))); bar.querySelector('.ftop').textContent = `Мій топ: ${top.length} · скопіювати`; }
-  bar.querySelector('.fs').textContent = v.src || '';
+  const m = (window.FIT_M || {})[theme] && window.FIT_M[theme][id];   /* числа машини (check_bg.py --json) — щоб вибір спирався й на заміри, не лише на око */
+  bar.querySelector('.fs').textContent = (v.src || '') + (m ? ' · машина: ' + m : '');
 }
 window.FIT = {V, oklchHex, pick, cur: () => cur, fx: on => { fxOn = on; pick(cur.theme, cur.id); }};
 const css = document.createElement('style');
@@ -157,17 +165,22 @@ css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8
 #fit .fi{width:36px;height:36px;padding:0;border-radius:50%;font-weight:700}   /* «i» — тап, не наведення; ціль ≥ 36 px (пошук S40: uxmovement, SAP info popover) */
 #meter,#fab.bx-fab,.bx-bar{display:none!important}   /* службове стенда — не частина екрана; .bx-bar — свій перемикач теми стенда, не синхронізований з панеллю примірки (огляд прев'ю v1, S40) */
 body{padding-top:var(--fitH,120px)!important}
-#sbox.fxrim :is(.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-act)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;pointer-events:none;z-index:3;
+#sbox.fxrim :is(.el-nav, .el-fab, .el-hgrp){isolation:isolate}
+#sbox.fxrim :is(.el-nav, .el-fab, .el-hgrp)::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+ background:radial-gradient(ellipse 75% 85% at 18% -12%, rgba(255,255,255,var(--sa,0)) 0, rgba(255,255,255,calc(var(--sa,0) * .35)) 38%, rgba(255,255,255,0) 66%),
+  radial-gradient(ellipse 80% 60% at 70% 118%, var(--sb, transparent) 0, transparent 70%)}   /* розбір v7 п.6: блиск НА склі — угорі зліва з джерела світла, знизу — відсвіт аврори; під вмістом (z-index:-1 в ізольованому шарі), іконки не миє */
+#sbox.fxrim :is(.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-hgrp)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;pointer-events:none;z-index:3;
  background:linear-gradient(var(--la,125deg), rgba(255,255,255,var(--ra)) 0%, rgba(255,255,255,calc(var(--ra) * .3)) 14%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 64%, var(--rimEnd, transparent) 100%);   /* розбір v7 п.3–4: блиск лише з боку світла; кінець — тінь з відтінком аврори (світла) або нуль (темна) */
  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}   /* кант-блиск: лише ребро (маска «рамка»), кут світла — --la */
+#fit .fcmp{width:36px;height:36px;padding:0;font-size:16px}
 #fit .fstar{width:44px;height:44px;padding:0;font-size:18px}
 #fit .ftop{font-size:12px}`;
 document.head.appendChild(css);
 const bar = document.createElement('div'); bar.id = 'fit';
-bar.innerHTML = `<div class="row"><b style="align-self:center">Фон</b><button data-th="light">Світла</button><button data-th="dark">Темна</button><button class="fxb" aria-pressed="true">Відблиск</button><button class="fi" aria-expanded="false" aria-label="Звідки цей варіант">i</button></div><div class="row fnav"><button class="fp" aria-label="Попередній варіант">‹</button><select class="fsel" aria-label="Варіант фону"></select><button class="fn" aria-label="Наступний варіант">›</button><button class="fstar" aria-pressed="false" aria-label="Додати в топ">☆</button></div><div class="row"><button class="ftop">Мій топ: 0 · скопіювати</button></div><div class="fs" hidden></div>`;
+bar.innerHTML = `<div class="row"><b style="align-self:center">Фон</b><button data-th="light">Світла</button><button data-th="dark">Темна</button><button class="fxb" aria-pressed="true">Відблиск</button><button class="fcmp" aria-label="Утримуй — показати «Зараз» для порівняння">⇄</button><button class="fi" aria-expanded="false" aria-label="Звідки цей варіант">i</button></div><div class="row fnav"><button class="fp" aria-label="Попередній варіант">‹</button><select class="fsel" aria-label="Варіант фону"></select><button class="fn" aria-label="Наступний варіант">›</button><button class="fstar" aria-pressed="false" aria-label="Додати в топ">☆</button></div><div class="row"><button class="ftop">Мій топ: 0 · скопіювати</button></div><div class="fs" hidden></div>`;
 document.body.appendChild(bar);
 bar.addEventListener('click', e => {
-  const t = e.target.closest('button'); if (!t) return;
+  const t = e.target.closest('button'); if (!t || t.classList.contains('fcmp')) return;
   if (t.classList.contains('fi')) { const f = bar.querySelector('.fs'); f.hidden = !f.hidden; t.setAttribute('aria-expanded', String(!f.hidden)); return; }   /* пояснення — за «i» (Konst S40: текст займав верх екрана телефона) */
   if (t.classList.contains('fstar')) { const k = cur.theme + ':' + cur.id; top = top.includes(k) ? top.filter(x => x !== k) : top.concat(k); saveTop(); pick(cur.theme, cur.id); return; }
   if (t.classList.contains('ftop')) { const txt = 'Топ фону: ' + (top.map(k => { const [th, id] = k.split(':'); return (th === 'light' ? 'світла ' : 'темна ') + ((V[th].find(x => x.id === id) || {}).name || id); }).join(' · ') || 'порожньо');
@@ -176,6 +189,13 @@ bar.addEventListener('click', e => {
   if (t.classList.contains('fp') || t.classList.contains('fn')) { const L = V[cur.theme], k = L.findIndex(x => x.id === cur.id); pick(cur.theme, L[(k + (t.classList.contains('fn') ? 1 : L.length - 1)) % L.length].id); return; }
   if (t.dataset.th) pick(t.dataset.th, 'now');
 });
+/* ⇄ — утримуй: на екрані «Зараз» тієї ж теми, відпустив — назад (порівняння до/після одним пальцем на телефоні;
+   зовнішньої практики не шукав — не перевірено, механіка та сама, що перемикач «Відблиск»). Стан варіанта не губиться: повертаємось до збереженого id. */
+{ const b = bar.querySelector('.fcmp'); let back = null;
+  const on = e => { e.preventDefault(); if (back || cur.id === 'now') return; back = cur.id; pick(cur.theme, 'now'); b.setAttribute('aria-pressed', 'true'); };
+  const off = () => { if (!back) return; const id = back; back = null; pick(cur.theme, id); b.setAttribute('aria-pressed', 'false'); };
+  b.addEventListener('pointerdown', on); ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => b.addEventListener(t, off));
+  b.addEventListener('contextmenu', e => e.preventDefault()); }
 /* кант-блиск потребує позиціонованого предка: лише статичним даємо relative (острівець і «+» уже позиціоновані) */
 new MutationObserver(() => sbox.querySelectorAll(GLASS).forEach(e => { if (getComputedStyle(e).position === 'static') e.style.position = 'relative'; })).observe(sbox, {childList:true, subtree:true});
 /* блиск ковзає по ребру під час прокрутки (наближення руху телефона; гіроскоп на iPhone потребує дозволу — не в примірці) */

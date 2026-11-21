@@ -20,7 +20,10 @@ let k = 0;
 const leak = process.argv.includes('--inject-leak');   // зуб: один запис лишається справжнім → перевірка нижче мусить упасти
 const synth = stand.slice(0, i).replace(REC, (m, n, s1, a, s2) => { k++; if (leak && k === 1) return m; return `{n:'Аптека ${k}',${s1}a:'вул. Тестова, ${k*7-4}',${s2}c:'${k % 2 ? 'Місто А' : 'Місто Б'}'`; });
 if (!k) throw new Error('дані стенда не знайдено — синтетична підміна не спрацювала');
-const page = synth + '<script>\n' + fit + '\n</script>\n' + stand.slice(i);
+/* числа машини в «i» (v8): out/metrics.json від check_bg.py --json — якщо є (другий прохід: знімок → суддя → сторінка) */
+const mf = path.join(out, 'metrics.json');
+const metrics = fs.existsSync(mf) ? fs.readFileSync(mf, 'utf8') : '{}';
+const page = synth + '<script>\nwindow.FIT_M = ' + metrics + ';\n' + fit + '\n</script>\n' + stand.slice(i);
 /* перевірка НЕЗАЛЕЖНА від заміни (звірка виходу з оригіналом, не тим самим шаблоном — hoop.dev / hackernoon «prove masking worked», 21.11.2026): кожне справжнє значення стенда шукається в готовій сторінці; знайдено — сторінку не записано */
 const left = [...real].filter(v => page.includes(v));
 if (left.length) { console.error(`✗ у сторінці лишились справжні дані (${left.length} з ${real.size}) — прев'ю публічне, сторінку не записано`); process.exit(1); }
@@ -75,6 +78,11 @@ if (process.argv.includes('--page-only')) { console.log('сторінка:', pag
       return res;
     });
     fs.writeFileSync(path.join(out, `${theme}_${id}.json`), JSON.stringify(items));
+    /* рамки скла для судді «блиск на склі» (check_bg.py): острівець · «+» · капсула шапки — за класом стенда, перевірено за ознакою (backdrop-filter) S40 */
+    const glass = await p.evaluate(() => { const R = document.getElementById('sbox').getBoundingClientRect();
+      return ['.el-nav', '.el-fab', '.el-hgrp'].map(q => { const e = document.querySelector('#sbox ' + q); if (!e) return null; const r = e.getBoundingClientRect();
+        return {q, x: r.left - R.left, y: r.top - R.top, w: r.width, h: r.height}; }).filter(Boolean); });
+    fs.writeFileSync(path.join(out, `${theme}_${id}_glass.json`), JSON.stringify(glass));
     await p.addStyleTag({content: '#sbox, #sbox *{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important}', }).then(h => h.evaluate(n => n.id = 'notext'));
     await p.locator('#sbox').screenshot({ path: path.join(out, `${theme}_${id}_bg.png`) });
     await p.evaluate(() => document.getElementById('notext').remove());
