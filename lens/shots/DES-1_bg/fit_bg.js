@@ -124,7 +124,7 @@ window.aurLayers = function(dark){
   return L.concat(b).join(',');   // перший шар малюється зверху
 };
 const GLASS = '.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-act';
-function rimSync(){ const f = fxOf(effTheme() === 'dark'); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f) sbox.style.setProperty('--ra', f.rim); }
+function rimSync(){ const dk = effTheme() === 'dark', f = fxOf(dk); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f){ sbox.style.setProperty('--ra', f.rim); sbox.style.setProperty('--rimEnd', dk ? 'transparent' : hsl(S.bgH3L, 45, 52, '.40')); } }
 function pick(theme, id){
   Object.keys(S).forEach(k => { S[k] = NOW[k]; });
   cur = {theme, id};
@@ -158,7 +158,7 @@ css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8
 #meter,#fab.bx-fab,.bx-bar{display:none!important}   /* службове стенда — не частина екрана; .bx-bar — свій перемикач теми стенда, не синхронізований з панеллю примірки (огляд прев'ю v1, S40) */
 body{padding-top:var(--fitH,120px)!important}
 #sbox.fxrim :is(.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-act)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;pointer-events:none;z-index:3;
- background:linear-gradient(var(--la,125deg), rgba(255,255,255,var(--ra)) 0%, rgba(255,255,255,0) 26%, rgba(255,255,255,0) 66%, rgba(255,255,255,calc(var(--ra) * .5)) 100%);
+ background:linear-gradient(var(--la,125deg), rgba(255,255,255,var(--ra)) 0%, rgba(255,255,255,calc(var(--ra) * .3)) 14%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 64%, var(--rimEnd, transparent) 100%);   /* розбір v7 п.3–4: блиск лише з боку світла; кінець — тінь з відтінком аврори (світла) або нуль (темна) */
  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}   /* кант-блиск: лише ребро (маска «рамка»), кут світла — --la */
 #fit .fstar{width:44px;height:44px;padding:0;font-size:18px}
 #fit .ftop{font-size:12px}`;
