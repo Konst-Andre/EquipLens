@@ -13,6 +13,7 @@
     Поріг «тінь»: 3.0 (ставка агента; джерела дисплеїв кажуть 5:1 для всього екрана — не для тексту на картці).
  3. ЖОВТИЗНА — частка пікселів фону з відтінком OKLCH 60–110° і C > 0.02 (слово Konst S39: «тепла читається як жовтизна»). ✗ > 1 %.
  4. РІЗНИЦЯ — середня відстань OKLab кадру без тексту від «зараз»: < 0.006 — варіант на телефоні не відрізнити (✗).
+ 5. СУСІД — відстань до найближчого іншого варіанта тієї ж теми: < 0.008 — два варіанти майже одне (⚠, не ✗: вибір звужує Konst; v6, Konst 21.11 «дай більше цікавого вибору»).
 Зуби: --inject підкидає жовтий фон і блідий текст у перший варіант світлої → ✗ мусить з'явитись.
 Запуск: python3 lens/shots/DES-1_bg/check_bg.py <тека> [--inject]
 """
@@ -127,6 +128,10 @@ def main():
                 marks.append(f'✗ не відрізнити від «зараз» (ΔE {de:.4f})'); bad += 1
             print(f'  {v:4} контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
                   f' · жовтизна {r["yellow"]*100:.2f} % · ΔE від «зараз» {de:.4f} · (чіп/бейдж мін {r["chip"][0]:.2f} «{r["chip"][1]}»)  ' + ('  '.join(marks) if marks else '✓'))
+        dist = lambda x, y: sum(math.dist(p, q) for p, q in zip(res[x]['labs'], res[y]['labs'])) / len(res[x]['labs'])
+        near = [(min((dist(v, u), u) for u in ids if u != v), v) for v in ids if len(ids) > 2]
+        close = sorted({tuple(sorted((v, u))) + (round(d, 4),) for (d, u), v in near if d < 0.008})
+        print('  сусід (найближчий): ' + ' · '.join(f'{v}→{u} {d:.3f}' for (d, u), v in near) + ('' if not close else '   ⚠ майже одне: ' + ', '.join(f'{a}≈{b} ({d})' for a, b, d in close)))
     print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else ''))
     if inject:
         print('ЗЛОВИВ' if bad else 'НЕ ЗЛОВИВ — у приладу нема зубів'); return 0 if bad else 1

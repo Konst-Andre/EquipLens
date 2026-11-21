@@ -31,11 +31,37 @@ const V = {
     {id:'S', name:'Шавлія', src:'kigen: Mineral Green (mineral 400 #6D9180, h 164) — основа сіро-зелена, аврора тінню (як Б), але з відтінком м\u02bcяти й бузку',
       base:{L:.955, C:.016, H:160}, s:{bg:'hybrid', bgH1L:152, bgH2L:200, bgH3L:261, bgA1L:22, bgA2L:16, bgA3L:14, bgSatL:34, bgLtL:70, haAL:12, bgTiltL:4}},
     /* Г «Бірюзове скло» (GlassKit світла) — відкинуто Konst S40: «для світлої теми вона не буде працювати» */
+    /* v6 — Konst 21.11: «ще варіанти… навіщо рожевий… тришарова аврора, щоб відчувався відблиск». Нові — без рожевого (рожеве прийшло з В «Світанок»);
+       холодна гама навколо м'яти, відтінки — шкали kigen.design/color; третій шар — `fx` (відблиск), перемикач «Відблиск» у панелі. */
+    {id:'L1', name:'Лагуна', src:'аква · бірюза · м\u02bcята (kigen aqua 100 #9FE2D8 · mint 100): морська вода на мілині', base:{L:.962, C:.012, H:195},
+      s:{bg:'all', bgH1L:171, bgH2L:195, bgH3L:152, bgA1L:34, bgA2L:30, bgA3L:22, bgSatL:58, bgLtL:74, bgSpread:120, bgTiltL:2}},
+    {id:'L2', name:'Лаванда й м\u02bcята', src:'бузок (kigen lilac 100 #E2D9F3) · м\u02bcята · блакить — прохолодно, без рожевого', base:{L:.966, C:.008, H:280},
+      s:{bg:'all', bgH1L:261, bgH2L:152, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:76, bgSpread:120, bgTiltL:2}, fx:{irid:.12}},
+    {id:'L3', name:'Перлина', src:'перламутр: три бліді відтінки (м\u02bcята · блакить · бузок) + сильний відблиск і райдужна плівка — показ третього шару', base:{L:.972, C:.006, H:260},
+      s:{bg:'all', bgH1L:171, bgH2L:230, bgH3L:280, bgA1L:26, bgA2L:24, bgA3L:20, bgSatL:50, bgLtL:80, bgSpread:125, bgTiltL:2}, fx:{sheen:.48, spot:.55, irid:.18}},
+    {id:'L4', name:'Морозна м\u02bcята', src:'м\u02bcята з крижаною блакиттю, основа холодніша', base:{L:.968, C:.010, H:180},
+      s:{bg:'all', bgH1L:160, bgH2L:200, bgH3L:225, bgA1L:30, bgA2L:24, bgA3L:20, bgSatL:52, bgLtL:78, bgSpread:120, bgTiltL:2}, fx:{sheen:.42}},
+    {id:'L5', name:'Евкаліпт', src:'сіро-бірюзова основа, аврора кольоровою тінню (як Б, але з характером)', base:{L:.950, C:.018, H:185},
+      s:{bg:'hybrid', bgH1L:175, bgH2L:150, bgH3L:205, bgA1L:24, bgA2L:18, bgA3L:14, bgSatL:36, bgLtL:66, haAL:14, bgTiltL:4}},
+    {id:'L6', name:'Північне сяйво', src:'смуги м\u02bcяти, бірюзи й фіалки — найсміливіший світлий', base:{L:.965, C:.008, H:230},
+      s:{bg:'all', bgH1L:150, bgH2L:185, bgH3L:270, bgA1L:40, bgA2L:34, bgA3L:26, bgSatL:62, bgLtL:72, bgSpread:125, bgTiltL:2}},
+    {id:'L7', name:'Небо', src:'блакить трьох відтінків (kigen sky 100 #D1E2F6) + яскравий відблиск угорі — ясний день', base:{L:.968, C:.010, H:240},
+      s:{bg:'all', bgH1L:205, bgH2L:220, bgH3L:190, bgA1L:32, bgA2L:26, bgA3L:20, bgSatL:60, bgLtL:78, bgSpread:120, bgTiltL:2}, fx:{sheen:.40, spot:.48}},
+    {id:'L8', name:'Нефрит', src:'насичена зелень каменю (Mineral Green, h 155–175) — найзеленіший', base:{L:.955, C:.020, H:160},
+      s:{bg:'all', bgH1L:155, bgH2L:140, bgH3L:175, bgA1L:36, bgA2L:28, bgA3L:22, bgSatL:50, bgLtL:70, bgSpread:120, bgTiltL:2}},
   ],
   dark: [
     {id:'now', name:'Зараз', src:'стенд v17_30: майже чорна основа (dkH 250 · C 7 · L 6) + синьо-фіолетова аврора', s:{}},
     /* Д1 «Петроль» (GlassKit темна) — відкинуто Konst S40: «слабша, ніж у мене темна» */
     /* Д2 «Індиго» — не прийнято Konst S40: «слабша, ніж моя темна… дивна та більш однотипна» → темна — «Зараз» (числа — git v3, 3346bf3) */
+    /* v6 — темна: твоя «Зараз» лишається базою; у нових яскравіше світіння, тож тихе чорнило (другорядний текст) світліше — mutL 82 замість 74 (той самий лік, що в Д1 S40: парне чорнило); нові — сусіди її настрою (глибока основа + світіння), D7 — «Зараз» лише з третім шаром */
+    {id:'D1', name:'Глибоке море', src:'темна бірюза: основа h 215, світіння бірюзи й аква', s:{mutL:82, dkH:215, dkC:12, dkL:7, bgH1D:190, bgH2D:210, bgH3D:170, bgA1D:30, bgA2D:18, bgA3D:10, bgSatD:70, bgLtD:46}},
+    {id:'D2', name:'Смарагдова ніч', src:'зелено-бірюзове світіння на майже чорному — м\u02bcята вночі', s:{mutL:82, dkH:180, dkC:8, dkL:6, bgH1D:160, bgH2D:175, bgH3D:200, bgA1D:28, bgA2D:16, bgA3D:10, bgSatD:64, bgLtD:44}},
+    {id:'D3', name:'Північне сяйво', src:'класичне сяйво: зелень → бірюза → фіалка', s:{mutL:82, dkH:240, dkC:8, dkL:6, bgH1D:150, bgH2D:175, bgH3D:280, bgA1D:30, bgA2D:20, bgA3D:14, bgSatD:72, bgLtD:48}},
+    {id:'D4', name:'Опівніч', src:'твоя «Зараз», але глибша й сильніша: синє світіння яскравіше, основа темніша', s:{mutL:82, dkH:250, dkC:9, dkL:5, bgH1D:215, bgH2D:265, bgH3D:190, bgA1D:34, bgA2D:20, bgA3D:12, bgSatD:78, bgLtD:50}},
+    {id:'D5', name:'Графіт і м\u02bcята', src:'нейтральний графіт, тихе м\u02bcятне світіння', s:{mutL:82, dkH:200, dkC:3, dkL:7, bgH1D:160, bgH2D:190, bgH3D:150, bgA1D:22, bgA2D:12, bgA3D:8, bgSatD:56, bgLtD:42}},
+    {id:'D6', name:'Космос', src:'три різні світіння (блакить · фіалка · бірюза) — найбільше глибини', s:{mutL:82, dkH:255, dkC:8, dkL:5, bgH1D:200, bgH2D:285, bgH3D:175, bgA1D:30, bgA2D:22, bgA3D:16, bgSatD:74, bgLtD:48}, fx:{irid:.06}},
+    {id:'D7', name:'Зараз + відблиск', src:'твоя «Зараз» без змін, лише третій шар: смуга світла, блиск угорі, райдужна плівка + тихе чорнило світліше (82 замість 74), щоб другорядний текст не тонув', s:{mutL:82}, fx:{sheen:.10, spot:.14, irid:.05}},
   ]
 };
 const NOW = JSON.parse(JSON.stringify(S));
@@ -52,6 +78,24 @@ window.applyVars = function(){
     st.setProperty('--sheet', hexA(hx, S.shtAL/100));
   }
 };
+/* ТРЕТІЙ ШАР — відблиск (Konst 21.11: «тришарова аврора, щоб скло було цікаве, а не однотонне, щоб відчувався відблиск»).
+   Шар 1 — основа й нахил стенда; шар 2 — плями аврори стенда; шар 3 — світло поверх них: блиск угорі (під склом шапки), напрямлена смуга світла
+   і райдужна плівка (конічний градієнт). Рецепт — стек радіальних + конічний шар + напрямлена смуга (superdesign.dev «aurora» · chrislemke «Aurora Gradient», 21.11.2026).
+   «Зараз» — без третього шару (база машини); інші — типові числа теми або свої `fx`; перемикач «Відблиск» вимикає шар усім для порівняння. */
+const FX0 = {light:{sheen:.30, ang:118, spot:.34, irid:.08}, dark:{sheen:.07, ang:118, spot:.10, irid:.035}};
+let fxOn = true;
+const aur0 = aurLayers;
+window.aurLayers = function(dark){
+  const b = aur0(dark), v = V[cur.theme].find(x => x.id === cur.id) || {};
+  if (!fxOn || !b || (v.id === 'now' && !v.fx)) return b;
+  const f = Object.assign({}, FX0[dark ? 'dark' : 'light'], v.fx || {}), w = a => `rgba(255,255,255,${a.toFixed(3)})`, L = [];
+  if (f.spot) L.push(`radial-gradient(ellipse 70% 18% at 80% 4%, ${w(f.spot)} 0, transparent 70%)`);
+  /* смуга — вузька й чітка (перша редакція 30–63 % читалась як тон, не як блиск): головна + тонка друга паралельно, як відбиток вікна на склі */
+  if (f.sheen) L.push(`linear-gradient(${f.ang}deg, transparent 38%, ${w(f.sheen)} 45%, ${w(f.sheen * .25)} 49%, transparent 52%, ${w(f.sheen * .5)} 55%, transparent 58%)`);
+  if (f.irid){ const l = dark ? 60 : 72, c = h => `hsla(${h},85%,${l}%,${f.irid.toFixed(3)})`;
+    L.push(`conic-gradient(from 210deg at 28% 72%, ${c(160)}, ${c(195)}, ${c(235)}, ${c(275)}, ${c(160)})`); }
+  return L.concat(b).join(',');   // перший шар малюється зверху
+};
 function pick(theme, id){
   Object.keys(S).forEach(k => { S[k] = NOW[k]; });
   cur = {theme, id};
@@ -61,10 +105,12 @@ function pick(theme, id){
   const bar = document.getElementById('fit'), v = V[theme].find(x => x.id === id) || {};
   bar.dataset.theme = theme; bar.dataset.v = id;
   bar.querySelectorAll('[data-th]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.th === theme)));
-  bar.querySelector('.fv').innerHTML = V[theme].map(x => `<button data-id="${x.id}" aria-pressed="${x.id===id}">${x.name}</button>`).join('');
+  const sel = bar.querySelector('.fsel'), k = V[theme].findIndex(x => x.id === id);
+  sel.innerHTML = V[theme].map((x, n) => `<option value="${x.id}"${x.id===id ? ' selected' : ''}>${n + 1}/${V[theme].length} · ${x.name}</option>`).join('');
+  bar.querySelector('.fxb').setAttribute('aria-pressed', String(fxOn));
   bar.querySelector('.fs').textContent = v.src || '';
 }
-window.FIT = {V, oklchHex, pick, cur: () => cur};
+window.FIT = {V, oklchHex, pick, cur: () => cur, fx: on => { fxOn = on; pick(cur.theme, cur.id); }};
 const css = document.createElement('style');
 css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8px 10px 6px;font:13px/1.3 system-ui,sans-serif;color:#222;background:rgba(255,255,255,.94);border-bottom:1px solid rgba(0,0,0,.1)}
 #fit[data-theme=dark]{color:#eee;background:rgba(20,20,26,.94);border-color:rgba(255,255,255,.1)}
@@ -72,20 +118,28 @@ css.textContent = `#fit{position:fixed;left:0;right:0;top:0;z-index:99;padding:8
 #fit button{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}
 #fit button[aria-pressed=true]{background:#3a5bd9;color:#fff;border-color:#3a5bd9}
 #fit .fs{opacity:.75;font-size:11.5px}
+#fit .fnav{flex-wrap:nowrap}
+#fit .fsel{flex:1;min-width:0;font:16px system-ui,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.4);background:transparent;color:inherit}   /* 16 px — iOS не збільшує сторінку на фокусі; список — рідне колесо вибору iPhone */
+#fit .fp,#fit .fn{width:44px;height:44px;padding:0;font-size:20px}
+#fit .fsel{height:44px}
+#fit button:active{transform:scale(.94);background:rgba(127,127,127,.18)}   /* відгук пальцю (кукбук A67); ціль 44 px — Apple */
 #fit .fs[hidden]{display:none}
 #fit .fi{width:36px;height:36px;padding:0;border-radius:50%;font-weight:700}   /* «i» — тап, не наведення; ціль ≥ 36 px (пошук S40: uxmovement, SAP info popover) */
 #meter,#fab.bx-fab,.bx-bar{display:none!important}   /* службове стенда — не частина екрана; .bx-bar — свій перемикач теми стенда, не синхронізований з панеллю примірки (огляд прев'ю v1, S40) */
 body{padding-top:var(--fitH,120px)!important}`;
 document.head.appendChild(css);
 const bar = document.createElement('div'); bar.id = 'fit';
-bar.innerHTML = `<div class="row"><b style="align-self:center">Фон · примірка</b><button data-th="light">Світла</button><button data-th="dark">Темна</button><button class="fi" aria-expanded="false" aria-label="Звідки цей варіант">i</button></div><div class="row fv"></div><div class="fs" hidden></div>`;
+bar.innerHTML = `<div class="row"><b style="align-self:center">Фон</b><button data-th="light">Світла</button><button data-th="dark">Темна</button><button class="fxb" aria-pressed="true">Відблиск</button><button class="fi" aria-expanded="false" aria-label="Звідки цей варіант">i</button></div><div class="row fnav"><button class="fp" aria-label="Попередній варіант">‹</button><select class="fsel" aria-label="Варіант фону"></select><button class="fn" aria-label="Наступний варіант">›</button></div><div class="fs" hidden></div>`;
 document.body.appendChild(bar);
 bar.addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.classList.contains('fi')) { const f = bar.querySelector('.fs'); f.hidden = !f.hidden; t.setAttribute('aria-expanded', String(!f.hidden)); return; }   /* пояснення — за «i» (Konst S40: текст займав верх екрана телефона) */
-  if (t.dataset.th) pick(t.dataset.th, 'now'); else if (t.dataset.id) pick(cur.theme, t.dataset.id);
+  if (t.classList.contains('fxb')) { fxOn = !fxOn; pick(cur.theme, cur.id); return; }
+  if (t.classList.contains('fp') || t.classList.contains('fn')) { const L = V[cur.theme], k = L.findIndex(x => x.id === cur.id); pick(cur.theme, L[(k + (t.classList.contains('fn') ? 1 : L.length - 1)) % L.length].id); return; }
+  if (t.dataset.th) pick(t.dataset.th, 'now');
 });
 try { setPanel(false); } catch(_){}
 pick('light', 'now');
+bar.querySelector('.fsel').addEventListener('change', e => pick(cur.theme, e.target.value));
 new ResizeObserver(() => document.body.style.setProperty('--fitH', bar.offsetHeight + 8 + 'px')).observe(bar);
 })();
