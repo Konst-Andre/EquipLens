@@ -17,19 +17,25 @@ function oklchHex(L, C, H){
 const V = {
   light: [
     {id:'now', name:'Зараз', src:'стенд v17_30: #EFEFF3 + синьо-бірюзова аврора (гібрид: дві плями + смуги під шапкою й острівцем)', base:null, s:{}},
-    {id:'A', name:'А · Перламутр', src:'lgcl.netlify.app (знімок Konst: L .90–.92 · C .03 · 256–298°) — синій → бузок → рожевий, плями великі й бліді',
-      base:{L:.938, C:.020, H:285}, s:{bg:'all', bgH1L:222, bgH2L:268, bgH3L:318, bgA1L:34, bgA2L:30, bgA3L:22, bgSatL:62, bgLtL:80, bgSpread:120, bgTiltL:2}},
-    {id:'B', name:'Б · Папір і тінь', src:'Apple «Adopting Liquid Glass»: поверхні читання суцільні + GlassKit світла (C .003) — майже без кольору, глибина тінню',
+    /* А «Перламутр» і В «Світанок» — зняті з v4: Konst S40 обрав напрям Б («наче добре… але занадто стерильно»); числа — git v3 (3346bf3) */
+    {id:'B', name:'Б · Папір і тінь', src:'Apple «Adopting Liquid Glass»: поверхні читання суцільні + GlassKit світла (C .003) — майже без кольору, глибина тінню. Konst S40: «занадто стерильно, скло — статичне тіло»',
       base:{L:.970, C:.005, H:240}, s:{bg:'hybrid', bgH1L:220, bgH2L:250, bgH3L:210, bgA1L:12, bgA2L:12, bgA3L:10, bgSatL:30, bgLtL:70, haAL:10, bgTiltL:5}},
-    {id:'C', name:'В · Світанок', src:'Dribbble AI (синій ↔ персиковий; кремову рамку h≈90 відкинуто — жовтизна) + Paperpillar (бузок h276): тепле — рожеве, не персик',
-      base:{L:.952, C:.012, H:300}, s:{bg:'all', bgH1L:212, bgH2L:345, bgH3L:262, bgA1L:36, bgA2L:30, bgA3L:20, bgSatL:64, bgLtL:80, bgSpread:125, bgTiltL:2}},
+    /* v4 — слово Konst S40: «Б+В… нейтрально цікавіше, м'ятний вайб, пастельний»; відтінки — шкали kigen.design/color (Tailwind, 50–200), заміри OKLCH — lens/DES-1_brief.md §5 п.5+6.
+       Скло оживає лише над кольором, який воно розмиває (clay.global «glassmorphism», nngroup «glassmorphism»): у Б кольору під склом майже нема → сила й насиченість еліпсів вищі, основа лишається спокійною. */
+    {id:'BC', name:'Б+В', src:'папір Б + рожево-синя аврора В, слабша за В: спокій Б, але скло має що розмивати',
+      base:{L:.970, C:.005, H:240}, s:{bg:'all', bgH1L:212, bgH2L:345, bgH3L:262, bgA1L:34, bgA2L:30, bgA3L:24, bgSatL:60, bgLtL:72, bgSpread:120, bgTiltL:2}},
+    {id:'M', name:'М\u02bcята', src:'kigen: mint 50 #DFF6EA (основа, приглушена до C .014) · аврора mint 100 #B1E8CE · aqua #9FE2D8 · sky #D1E2F6',
+      base:{L:.962, C:.014, H:165}, s:{bg:'all', bgH1L:152, bgH2L:171, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:80, bgSpread:120, bgTiltL:2}},
+    {id:'P', name:'Пастель', src:'kigen: нейтральний папір · аврора mint #B1E8CE · lilac #E2D9F3 · blush #F7DDE7 — три пастелі, жодна не головна',
+      base:{L:.965, C:.006, H:250}, s:{bg:'all', bgH1L:152, bgH2L:261, bgH3L:337, bgA1L:38, bgA2L:34, bgA3L:28, bgSatL:62, bgLtL:72, bgSpread:125, bgTiltL:2}},
+    {id:'S', name:'Шавлія', src:'kigen: Mineral Green (mineral 400 #6D9180, h 164) — основа сіро-зелена, аврора тінню (як Б), але з відтінком м\u02bcяти й бузку',
+      base:{L:.955, C:.016, H:160}, s:{bg:'hybrid', bgH1L:152, bgH2L:200, bgH3L:261, bgA1L:22, bgA2L:16, bgA3L:14, bgSatL:34, bgLtL:70, haAL:12, bgTiltL:4}},
     /* Г «Бірюзове скло» (GlassKit світла) — відкинуто Konst S40: «для світлої теми вона не буде працювати» */
   ],
   dark: [
     {id:'now', name:'Зараз', src:'стенд v17_30: майже чорна основа (dkH 250 · C 7 · L 6) + синьо-фіолетова аврора', s:{}},
     /* Д1 «Петроль» (GlassKit темна) — відкинуто Konst S40: «слабша, ніж у мене темна» */
-    {id:'I', name:'Д2 · Індиго', src:'Paperpillar (темна кнопка #0D0C21 · h283) + бузок lgcl — глибокий індиго, аврора бузкова з рожевим',
-      s:{dkH:250, dkC:34, dkL:9, dkS:6, dkR:10, bgH1D:232, bgH2D:282, bgH3D:318, bgA1D:30, bgA2D:24, bgA3D:12, bgSatD:52, bgLtD:44, bgTiltD:2}},
+    /* Д2 «Індиго» — не прийнято Konst S40: «слабша, ніж моя темна… дивна та більш однотипна» → темна — «Зараз» (числа — git v3, 3346bf3) */
   ]
 };
 const NOW = JSON.parse(JSON.stringify(S));

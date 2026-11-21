@@ -10,10 +10,21 @@ const fit = fs.readFileSync(path.join(__dirname, 'fit_bg.js'), 'utf8');
 const i = stand.lastIndexOf('</body>');
 if (i < 0) throw new Error('стенд без </body>');
 /* синтетичні дані й у ТЕКСТІ сторінки, не лише на екрані: прев'ю публічне (lens-governance:tools/PREVIEW.md §3 п.8) */
+/* значення в ' або " (місто «Кам'янське» стоїть у подвійних лапках — перша редакція їх пропускала: 10 справжніх записів пішли в прев'ю v1–v4, S40) */
+const Q = String.raw`(?:'[^']*'|"[^"]*")`;
+const REC = new RegExp(String.raw`\{n:(${Q}),(\s*)a:(${Q}),(\s*)c:(${Q})`, 'g');
+const real = new Set();
+/* перевіряються назва й адреса — дані людей; місто — географія (у журналі змін стенда «Дніпро», «Полтава» — не запис), його лише міняємо */
+for (const m of stand.slice(0, i).matchAll(REC)) for (const v of [m[1], m[3]]) { const t = v.slice(1, -1); if (t.length > 3) real.add(t); }
 let k = 0;
-const synth = stand.slice(0, i).replace(/\{n:'[^']*',(\s*)a:'[^']*',(\s*)c:'[^']*'/g, (m, s1, s2) => { k++; return `{n:'Аптека ${k}',${s1}a:'вул. Тестова, ${k*7-4}',${s2}c:'${k % 2 ? 'Місто А' : 'Місто Б'}'`; });
+const leak = process.argv.includes('--inject-leak');   // зуб: один запис лишається справжнім → перевірка нижче мусить упасти
+const synth = stand.slice(0, i).replace(REC, (m, n, s1, a, s2) => { k++; if (leak && k === 1) return m; return `{n:'Аптека ${k}',${s1}a:'вул. Тестова, ${k*7-4}',${s2}c:'${k % 2 ? 'Місто А' : 'Місто Б'}'`; });
 if (!k) throw new Error('дані стенда не знайдено — синтетична підміна не спрацювала');
 const page = synth + '<script>\n' + fit + '\n</script>\n' + stand.slice(i);
+/* перевірка НЕЗАЛЕЖНА від заміни (звірка виходу з оригіналом, не тим самим шаблоном — hoop.dev / hackernoon «prove masking worked», 21.11.2026): кожне справжнє значення стенда шукається в готовій сторінці; знайдено — сторінку не записано */
+const left = [...real].filter(v => page.includes(v));
+if (left.length) { console.error(`✗ у сторінці лишились справжні дані (${left.length} з ${real.size}) — прев'ю публічне, сторінку не записано`); process.exit(1); }
+console.log(`дані: справжніх значень у стенді ${real.size}, у сторінці 0 · записів замінено ${k}`);
 fs.mkdirSync(out, {recursive: true});
 const pagePath = path.join(out, 'DES-1_bg.html');
 fs.writeFileSync(pagePath, page);
