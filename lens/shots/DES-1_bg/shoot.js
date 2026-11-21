@@ -80,8 +80,12 @@ if (process.argv.includes('--page-only')) { console.log('сторінка:', pag
     fs.writeFileSync(path.join(out, `${theme}_${id}.json`), JSON.stringify(items));
     /* рамки скла для судді «блиск на склі» (check_bg.py): острівець · «+» · капсула шапки — за класом стенда, перевірено за ознакою (backdrop-filter) S40 */
     const glass = await p.evaluate(() => { const R = document.getElementById('sbox').getBoundingClientRect();
-      return ['.el-nav', '.el-fab', '.el-hgrp'].map(q => { const e = document.querySelector('#sbox ' + q); if (!e) return null; const r = e.getBoundingClientRect();
-        return {q, x: r.left - R.left, y: r.top - R.top, w: r.width, h: r.height}; }).filter(Boolean); });
+      const g = ['.el-nav', '.el-fab', '.el-hgrp'].map(q => { const e = document.querySelector('#sbox ' + q); if (!e) return null; const r = e.getBoundingClientRect();
+        return {q, x: r.left - R.left, y: r.top - R.top, w: r.width, h: r.height}; }).filter(Boolean);
+      /* v9: перші 2 картки цілком у кадрі — для судді канта (гучність · колір · видимість блиску) */
+      [...document.querySelectorAll('#sbox .el-list[data-row="card"] .el-item')].map(e => e.getBoundingClientRect()).filter(r => r.top > R.top + 80 && r.bottom < R.bottom - 120).slice(0, 2)
+        .forEach((r, i) => g.push({q: 'card' + (i + 1), x: r.left - R.left, y: r.top - R.top, w: r.width, h: r.height, rim: true}));
+      return g; });
     fs.writeFileSync(path.join(out, `${theme}_${id}_glass.json`), JSON.stringify(glass));
     await p.addStyleTag({content: '#sbox, #sbox *{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important}', }).then(h => h.evaluate(n => n.id = 'notext'));
     await p.locator('#sbox').screenshot({ path: path.join(out, `${theme}_${id}_bg.png`) });

@@ -36,7 +36,7 @@ const V = {
     {id:'L1', name:'Лагуна', src:'аква · бірюза · м\u02bcята (kigen aqua 100 #9FE2D8 · mint 100): морська вода на мілині', base:{L:.962, C:.012, H:195},
       s:{bg:'all', bgH1L:171, bgH2L:195, bgH3L:152, bgA1L:34, bgA2L:30, bgA3L:22, bgSatL:58, bgLtL:74, bgSpread:120, bgTiltL:2}},
     {id:'L2', name:'Лаванда й м\u02bcята', src:'бузок (kigen lilac 100 #E2D9F3) · м\u02bcята · блакить — прохолодно, без рожевого', base:{L:.966, C:.008, H:280},
-      s:{bg:'all', bgH1L:261, bgH2L:152, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:76, bgSpread:120, bgTiltL:2}, fx:{irid:.12, card:40}},
+      s:{bg:'all', bgH1L:261, bgH2L:152, bgH3L:212, bgA1L:34, bgA2L:28, bgA3L:22, bgSatL:56, bgLtL:76, bgSpread:120, bgTiltL:2}, fx:{card:40}},   /* v9: райдужна плівка .12 знята — лягала на край і гасила блиск канта (суддя: +.009 < .015) */
     {id:'L3', name:'Перлина', src:'перламутр: три бліді відтінки (м\u02bcята · блакить · бузок) + сильний відблиск і райдужна плівка — показ третього шару', base:{L:.972, C:.006, H:260},
       s:{bg:'all', bgH1L:171, bgH2L:230, bgH3L:280, bgA1L:26, bgA2L:24, bgA3L:20, bgSatL:50, bgLtL:80, bgSpread:125, bgTiltL:2}, fx:{rim:1, top:.7, bot:.6, side:.38, irid:.14}},
     {id:'L4', name:'Морозна м\u02bcята', src:'м\u02bcята з крижаною блакиттю, основа холодніша', base:{L:.968, C:.010, H:180},
@@ -100,7 +100,7 @@ window.applyVars = function(){
 /* v8 (розбір v7 п.5–6, 10): spec — блиск НА склі острівця, «+» і капсули шапки (внутрішня оболонка під вмістом: isolation + z-index:-1 — codepen «liquid glass button»,
    dev.to «Apple liquid glass with CSS», 21.11.2026; не SVG-заломлення — важке на старих телефонах); card — прозорість тла картки світлої (стенд cdAL 45 → менше:
    картка бере колір аврори, а не лишається «папером»; суддя контрасту вирішує, скільки можна). */
-const FX0 = {light:{top:.55, bot:.50, side:.30, rim:.95, irid:0, spec:.66, card:34}, dark:{top:.16, bot:.16, side:.10, rim:.50, irid:0, spec:.20, card:null}};
+const FX0 = {light:{top:.55, bot:.50, side:.30, rim:1, irid:0, spec:.66, card:34}, dark:{top:.16, bot:.16, side:.10, rim:.42, irid:0, spec:.22, card:null}};   /* rim v9: пік дуги; світла 1 (.85 — Лаванда й Сутінки з карткою 40 % не світили) (білий на краї, що межує з кольоровим полотном), темна .42 (medium «liquid glass»: верх ~.4) */
 let fxOn = true;
 const aur0 = aurLayers;
 function fxOf(dark){ const v = V[cur.theme].find(x => x.id === cur.id) || {}; return (!fxOn || (v.id === 'now' && !v.fx)) ? null : Object.assign({}, FX0[dark ? 'dark' : 'light'], v.fx || {}); }
@@ -128,7 +128,7 @@ window.aurLayers = function(dark){
 };
 /* v7 мав тут `.el-act` — це кнопки свайпу ПІД карткою (заміряно S40: 63×79 у рядку картки), а капсула шапки — `.el-hgrp` (розбір v7 п.10) */
 const GLASS = '.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-hgrp';
-function rimSync(){ const dk = effTheme() === 'dark', f = fxOf(dk); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f){ sbox.style.setProperty('--ra', f.rim); sbox.style.setProperty('--rimEnd', dk ? 'transparent' : hsl(S.bgH3L, 45, 52, '.40'));
+function rimSync(){ const dk = effTheme() === 'dark', f = fxOf(dk); sbox.classList.toggle('fxrim', !!(f && f.rim)); if (f){ sbox.style.setProperty('--ra', dk ? .16 : f.rim);   /* темна — .16 для всіх: стенд у темній уже має свій верхній блиск (ridge .24), понад нього .42 дав «кричить» (суддя канта v9: +.066–.095) */ sbox.style.setProperty('--rimBase', dk ? 'rgba(255,255,255,.10)' : hexA(oklchHex(.50, .05, S.bgH3L), .10));   /* тихе ребро: темна — білий .10, світла — ледь темніше з відтінком аврори .10 (lifa-su 2026: у світлій край тримає темніша лінія, не біла) */
     sbox.style.setProperty('--sa', f.spec || 0);   /* блиск угорі зліва — те саме джерело, що кант */
     sbox.style.setProperty('--sb', dk ? hsl(S.bgH1D, 70, 62, ((f.spec || 0) * .5).toFixed(3)) : hexA(oklchHex(.60, .07, S.bgH1L), (f.spec || 0) * .8)); } }   /* OKLCH, не HSL: однакова сприйнята світлота відсвіту для м'яти й бузку (HSL L58 у м'яти світліший — острівець м'ятних не світив, v8) */   /* знизу — відсвіт аврори крізь скло (каустика). Світла: середній тон, не світлий — білий блиск на білому склі не видно (суддя «блиск на склі» v8: ΔL острівця .017–.024 ≈ «зараз» .019); край світлого скла читається темнішим заломленням знизу */
 function pick(theme, id){
@@ -169,9 +169,9 @@ body{padding-top:var(--fitH,120px)!important}
 #sbox.fxrim :is(.el-nav, .el-fab, .el-hgrp)::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
  background:radial-gradient(ellipse 75% 85% at 18% -12%, rgba(255,255,255,var(--sa,0)) 0, rgba(255,255,255,calc(var(--sa,0) * .35)) 38%, rgba(255,255,255,0) 66%),
   radial-gradient(ellipse 80% 60% at 70% 118%, var(--sb, transparent) 0, transparent 70%)}   /* розбір v7 п.6: блиск НА склі — угорі зліва з джерела світла, знизу — відсвіт аврори; під вмістом (z-index:-1 в ізольованому шарі), іконки не миє */
-#sbox.fxrim :is(.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-hgrp)::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;pointer-events:none;z-index:3;
- background:linear-gradient(var(--la,125deg), rgba(255,255,255,var(--ra)) 0%, rgba(255,255,255,calc(var(--ra) * .3)) 14%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 64%, var(--rimEnd, transparent) 100%);   /* розбір v7 п.3–4: блиск лише з боку світла; кінець — тінь з відтінком аврори (світла) або нуль (темна) */
- -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}   /* кант-блиск: лише ребро (маска «рамка»), кут світла — --la */
+#sbox.fxrim :is(.el-list[data-row="card"] .el-item, .el-nav, .el-fab, .el-hgrp)::after{content:"";position:absolute;inset:calc(var(--bw, 0px) * -1);border-radius:inherit;padding:1px;pointer-events:none;z-index:3;
+ background:conic-gradient(from calc(var(--la,125deg) + 100deg), var(--rimBase) 0deg, var(--rimBase) 30deg, rgba(255,255,255,calc(var(--ra) * .55)) 62deg, rgba(255,255,255,var(--ra)) 90deg, rgba(255,255,255,calc(var(--ra) * .55)) 118deg, var(--rimBase) 150deg, var(--rimBase) 360deg);
+ -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}   /* v9 (Konst v8: «грубо… кричить», темна «не виражено»): тихе ребро --rimBase по всьому периметру + коротка дуга блиску з джерела світла (пік — 315°, угорі зліва; conic, гасне плавно — dev.to «Apple-style liquid glass rim», 21.11.2026), 1 px на справжньому краї; кольорового хвоста нема. Геометрія однакова в обох темах — різна лише сила */
 #fit .fcmp{width:36px;height:36px;padding:0;font-size:16px}
 #fit .fstar{width:44px;height:44px;padding:0;font-size:18px}
 #fit .ftop{font-size:12px}`;
@@ -197,7 +197,9 @@ bar.addEventListener('click', e => {
   b.addEventListener('pointerdown', on); ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => b.addEventListener(t, off));
   b.addEventListener('contextmenu', e => e.preventDefault()); }
 /* кант-блиск потребує позиціонованого предка: лише статичним даємо relative (острівець і «+» уже позиціоновані) */
-new MutationObserver(() => sbox.querySelectorAll(GLASS).forEach(e => { if (getComputedStyle(e).position === 'static') e.style.position = 'relative'; })).observe(sbox, {childList:true, subtree:true});
+/* v9: кант на ЗОВНІШНЬОМУ краї — `inset:0` абсолютного нащадка = край padding-box, тобто всередині рамки стенда (картка — 2 px, острівець — 1 px):
+   v8 малював кант за 2 px від краю з тінню → два контури, «змінює форму» (Konst v8 на iPhone). --bw — заміряна ширина рамки, кант виходить на неї. */
+new MutationObserver(() => sbox.querySelectorAll(GLASS).forEach(e => { const c = getComputedStyle(e); if (c.position === 'static') e.style.position = 'relative'; e.style.setProperty('--bw', c.borderTopWidth); })).observe(sbox, {childList:true, subtree:true});
 /* блиск ковзає по ребру під час прокрутки (наближення руху телефона; гіроскоп на iPhone потребує дозволу — не в примірці) */
 sbox.addEventListener('scroll', e => { sbox.style.setProperty('--la', (125 + (e.target.scrollTop || 0) * 0.12) % 360 + 'deg'); }, true);
 /* ★ у топ (💡 агента, Konst: «це дефолт») — вибір живе лише на цьому телефоні; «Топ» копіює список для агента */

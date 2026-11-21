@@ -53,6 +53,7 @@ def parse_color(s):
         return (n[0] * 255, n[1] * 255, n[2] * 255, n[3] if len(n) > 3 else 1.0)
     raise ValueError('невідомий формат кольору: ' + s)
 
+FIT_FX = {}   # варіанти без «Відблиску» (мають право без блиску) — порожньо: «Відблиск» є в усіх, крім «зараз»
 GLASS_T = 0.012   # ΔL OKLab: блиск на склі видно, коли верх-ліво світліше за низ-право на стільки більше, ніж у «зараз» (заміряно v8 S40 — див. REVIEW_v7.md п.6)
 
 def glass(d, theme, vid, flat=False):
@@ -63,6 +64,7 @@ def glass(d, theme, vid, flat=False):
     im = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB'); px = im.load(); W, H = im.size
     out = {}
     for g in json.load(open(f, encoding='utf-8')):
+        if g.get('rim'): continue
         x0, y0, w, h = int(g['x']) + 3, int(g['y']) + 3, int(g['w']) - 6, int(g['h']) - 6
         if w < 8 or h < 8 or x0 < 0 or y0 < 0 or x0 + w > W or y0 + h > H:
             continue
@@ -71,6 +73,41 @@ def glass(d, theme, vid, flat=False):
         br = mean(x0 + w // 2, x0 + w, y0 + h * 6 // 10, y0 + h)
         out[g['q']] = 0.0 if flat else tl - br
     return out
+
+def rim(d, theme, vid, inj=False):
+    """v9 (Konst v8 на iPhone: кант «грубо… кричить», у темній «не виражено»): край картки (зовнішні 2 px) проти смуги 4–7 px усередині.
+    loud — найбільша |ΔL| серед чотирьох сторін; tint — найбільший приріст кольоровості краю (кольоровий контур); vis — ΔL верху й ліва (блиск з джерела)."""
+    f = os.path.join(d, f'{theme}_{vid}_glass.json')
+    if not os.path.exists(f): return None
+    im = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB'); px = im.load(); W, H = im.size
+    res = []
+    for g in json.load(open(f, encoding='utf-8')):
+        if not g.get('rim'): continue
+        x0, y0, x1, y1 = int(round(g['x'])), int(round(g['y'])), int(round(g['x'] + g['w'])) - 1, int(round(g['y'] + g['h'])) - 1
+        if x0 < 0 or y0 < 0 or x1 >= W or y1 >= H: continue
+        if inj:   # зуб: грубий кольоровий контур 2 px
+            for x in range(x0, x1 + 1):
+                for y in (y0, y0 + 1, y1, y1 - 1): px[x, y] = (150, 90, 200)
+            for y in range(y0, y1 + 1):
+                for x in (x0, x0 + 1, x1, x1 - 1): px[x, y] = (150, 90, 200)
+        r = 24   # кути не міряємо — радіус картки
+        def band(side, a, b):
+            pts = []
+            if side == 't': pts = [(x, y0 + k) for x in range(x0 + r, x1 - r) for k in range(a, b)]
+            if side == 'b': pts = [(x, y1 - k) for x in range(x0 + r, x1 - r) for k in range(a, b)]
+            if side == 'l': pts = [(x0 + k, y) for y in range(y0 + r, y1 - r) for k in range(a, b)]
+            if side == 'r': pts = [(x1 - k, y) for y in range(y0 + r, y1 - r) for k in range(a, b)]
+            labs = [oklab(px[p]) for p in pts]
+            return sum(l[0] for l in labs) / len(labs), sum(math.hypot(l[1], l[2]) for l in labs) / len(labs)
+        sd = {}
+        for side in 'tblr':
+            (le, ce), (li, ci) = band(side, 0, 2), band(side, 4, 7)
+            sd[side] = (le - li, ce - ci)
+        res.append(dict(loud=max(abs(v[0]) for v in sd.values()), tint=max(v[1] for v in sd.values()), vis=max(sd['t'][0], sd['l'][0])))
+    if not res: return None
+    return {k: max(x[k] for x in res) for k in ('loud', 'tint', 'vis')}
+
+LOUD_T, TINT_T, VIS_T = 0.045, 0.012, 0.015   # v9, понад «зараз»: гучність ≤ LOUD_T, кольоровість ≤ TINT_T, блиск ≥ VIS_T. Калібровано на v8 (Konst на iPhone): світла L3 колір +.014 → ✗ «кольоровий контур»; темна D7 блиск +.013 → ✗ «не видно» (REVIEW_v7.md п.12)
 
 def judge(d, theme, vid, inject=False):
     bg = Image.open(os.path.join(d, f'{theme}_{vid}_bg.png')).convert('RGB')
@@ -129,6 +166,7 @@ def main():
     d = sys.argv[1]
     inject = '--inject' in sys.argv
     inj_glass = '--inject-glass' in sys.argv
+    inj_rim = '--inject-rim' in sys.argv
     jout = sys.argv[sys.argv.index('--json') + 1] if '--json' in sys.argv else None
     M = {}
     bad = 0
@@ -138,6 +176,7 @@ def main():
         res = {v: judge(d, theme, v, inject and theme == 'light' and v == ids[1]) for v in ids}
         base = res['now']
         gl = {v: glass(d, theme, v, inj_glass and theme == 'light' and v == ids[1]) for v in ids}
+        rm = {v: rim(d, theme, v, inj_rim and v == ids[1]) for v in ids}
         M[theme] = {}
         print(f'── {"світла" if theme == "light" else "темна"} ──')
         for v in ids:
@@ -159,18 +198,24 @@ def main():
                     need = n0 - 0.005 if n0 >= 3 * GLASS_T else max(n0 + GLASS_T, GLASS_T)
                     if dl < need:
                         marks.append(f'✗ блиску на склі нема ({q} ΔL {dl:.3f} < {need:.3f})'); bad += 1
+            if v != 'now' and rm[v] and rm['now']:
+                a, b0 = rm[v], rm['now']
+                if a['loud'] - b0['loud'] > LOUD_T: marks.append(f'✗ кант кричить (ΔL {a["loud"]:.3f}, «зараз» {b0["loud"]:.3f})'); bad += 1
+                if a['tint'] - b0['tint'] > TINT_T: marks.append(f'✗ кольоровий контур (ΔC {a["tint"]:.3f}, «зараз» {b0["tint"]:.3f})'); bad += 1
+                if a['vis'] - b0['vis'] < VIS_T and (FIT_FX.get(theme, {}).get(v, True)): marks.append(f'✗ блиску канта не видно (ΔL {a["vis"]:.3f}, «зараз» {b0["vis"]:.3f})'); bad += 1
+            rtxt = f'кант гучн {rm[v]["loud"]:.3f} колір {rm[v]["tint"]:+.3f} блиск {rm[v]["vis"]:+.3f}' if rm[v] else ''
             gtxt = ' '.join(f'{q.split("-")[-1]} {dl:+.3f}' for q, dl in gl[v].items())
-            M[theme][v] = f'контраст {w["cr"]} (поріг {w["need"]}) · на сонці {r["sun"][0]:.2f} · ΔE від «Зараз» {de:.3f}' + (f' · блиск скла {gtxt}' if gtxt else '')
-            print(f'  {v:4} блиск скла [{gtxt}] · контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
+            M[theme][v] = f'контраст {w["cr"]} (поріг {w["need"]}) · на сонці {r["sun"][0]:.2f} · ΔE від «Зараз» {de:.3f}' + (f' · блиск скла {gtxt}' if gtxt else '') + (f' · {rtxt}' if rtxt else '')
+            print(f'  {v:4} [{rtxt}] блиск скла [{gtxt}] · контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
                   f' · жовтизна {r["yellow"]*100:.2f} % · ΔE від «зараз» {de:.4f} · (чіп/бейдж мін {r["chip"][0]:.2f} «{r["chip"][1]}»)  ' + ('  '.join(marks) if marks else '✓'))
         dist = lambda x, y: sum(math.dist(p, q) for p, q in zip(res[x]['labs'], res[y]['labs'])) / len(res[x]['labs'])
         near = [(min((dist(v, u), u) for u in ids if u != v), v) for v in ids if len(ids) > 2]
         close = sorted({tuple(sorted((v, u))) + (round(d, 4),) for (d, u), v in near if d < 0.008})
         print('  сусід (найближчий): ' + ' · '.join(f'{v}→{u} {d:.3f}' for (d, u), v in near) + ('' if not close else '   ⚠ майже одне: ' + ', '.join(f'{a}≈{b} ({d})' for a, b, d in close)))
-    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else '') + ('  [--inject-glass]' if inj_glass else ''))
+    print(f'─── ПІДСУМОК: ✗ {bad} (зараз — база, її ✗ не рахуються) ───' + ('  [--inject]' if inject else '') + ('  [--inject-glass]' if inj_glass else '') + ('  [--inject-rim]' if inj_rim else ''))
     if jout:
         json.dump(M, open(jout, 'w', encoding='utf-8'), ensure_ascii=False); print('числа для «i»:', jout)
-    if inject or inj_glass:
+    if inject or inj_glass or inj_rim:
         print('ЗЛОВИВ' if bad else 'НЕ ЗЛОВИВ — у приладу нема зубів'); return 0 if bad else 1
     return 1 if bad else 0
 
