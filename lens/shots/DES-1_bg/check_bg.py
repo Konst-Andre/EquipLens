@@ -103,10 +103,11 @@ def rim(d, theme, vid, inj=False):
         for side in 'tblr':
             (le, ce), (li, ci) = band(side, 0, 2), band(side, 4, 7)
             sd[side] = (le - li, ce - ci)
-        res.append(dict(loud=max(abs(v[0]) for v in sd.values()), tint=max(v[1] for v in sd.values()), vis=max(sd['t'][0], sd['l'][0])))
+        res.append(dict(loud=max(abs(v[0]) for v in sd.values()), tint=max(v[1] for v in sd.values()), vis=max(sd['t'][0], sd['l'][0]), asym=abs(sd['l'][0] - sd['r'][0])))
     if not res: return None
-    return {k: max(x[k] for x in res) for k in ('loud', 'tint', 'vis')}
+    return {k: max(x[k] for x in res) for k in ('loud', 'tint', 'vis', 'asym')}
 
+ASYM_T = 0.010   # v10 світла: лівий і правий край картки різні (дуга з одного боку) — «деформує тіло» (Konst v9 на iPhone); понад «зараз» ≤ ASYM_T
 LOUD_T, TINT_T, VIS_T = 0.045, 0.012, 0.015   # v9, понад «зараз»: гучність ≤ LOUD_T, кольоровість ≤ TINT_T, блиск ≥ VIS_T. Калібровано на v8 (Konst на iPhone): світла L3 колір +.014 → ✗ «кольоровий контур»; темна D7 блиск +.013 → ✗ «не видно» (REVIEW_v7.md п.12)
 
 def judge(d, theme, vid, inject=False):
@@ -202,8 +203,9 @@ def main():
                 a, b0 = rm[v], rm['now']
                 if a['loud'] - b0['loud'] > LOUD_T: marks.append(f'✗ кант кричить (ΔL {a["loud"]:.3f}, «зараз» {b0["loud"]:.3f})'); bad += 1
                 if a['tint'] - b0['tint'] > TINT_T: marks.append(f'✗ кольоровий контур (ΔC {a["tint"]:.3f}, «зараз» {b0["tint"]:.3f})'); bad += 1
-                if a['vis'] - b0['vis'] < VIS_T and (FIT_FX.get(theme, {}).get(v, True)): marks.append(f'✗ блиску канта не видно (ΔL {a["vis"]:.3f}, «зараз» {b0["vis"]:.3f})'); bad += 1
-            rtxt = f'кант гучн {rm[v]["loud"]:.3f} колір {rm[v]["tint"]:+.3f} блиск {rm[v]["vis"]:+.3f}' if rm[v] else ''
+                if theme == 'light' and a['asym'] - b0['asym'] > ASYM_T: marks.append(f'✗ кант деформує тіло (ліво ⟂ право ΔL {a["asym"]:.3f}, «зараз» {b0["asym"]:.3f})'); bad += 1
+                if theme == 'dark' and a['vis'] - b0['vis'] < VIS_T: marks.append(f'✗ блиску канта не видно (ΔL {a["vis"]:.3f}, «зараз» {b0["vis"]:.3f})'); bad += 1
+            rtxt = f'кант гучн {rm[v]["loud"]:.3f} колір {rm[v]["tint"]:+.3f} блиск {rm[v]["vis"]:+.3f} асим {rm[v]["asym"]:.3f}' if rm[v] else ''
             gtxt = ' '.join(f'{q.split("-")[-1]} {dl:+.3f}' for q, dl in gl[v].items())
             M[theme][v] = f'контраст {w["cr"]} (поріг {w["need"]}) · на сонці {r["sun"][0]:.2f} · ΔE від «Зараз» {de:.3f}' + (f' · блиск скла {gtxt}' if gtxt else '') + (f' · {rtxt}' if rtxt else '')
             print(f'  {v:4} [{rtxt}] блиск скла [{gtxt}] · контраст мін {w["cr"]:>5} (поріг {w["need"]}, «{w["t"]}») · SUN-1 тінь {r["sun"][0]:.2f} · сонце {r["glare"][0]:.2f}'
