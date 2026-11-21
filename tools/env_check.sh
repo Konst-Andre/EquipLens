@@ -41,6 +41,7 @@ if [ "$debt" -gt 0 ]; then nf=$(printf '%s\n' $dfiles | sort -u | grep -c .); ag
   { [ "$nf" -ge 5 ] || [ "$age" -ge 7 ]; } && aud="$aud — ПОРА пакет за класом (lens-governance:tools/claude-code/templates/AUDIT_template.md)"; fi
 echo "env: github=${g:-000} · ${vars% } · гейт: $gate · $aud"
 [ -f "$K/tools/claude-code/profile_check.sh" ] && bash "$K/tools/claude-code/profile_check.sh"   # профіль: з репо (LENS_PROFILE=1) чи з налаштувань акаунта — lens-governance:tools/claude-code/ACCOUNT_MOVE.md п.1-а / 1-б
+[ -f "$K/tools/claude-code/webkit_ensure.sh" ] && bash "$K/tools/claude-code/webkit_ensure.sh" check   # другий рушій (родина Safari) — ставить диспетчер ядра у фоні; ⓘ, не гейт (lens-governance:kernel/Lens_stagebench_manifest.md §8.18)
 
 # самері — живий журнал (профіль Konst, САМЕРІ): коміти агента (трейлер Claude-Session) після останнього оновлення самері.
 # >0 → попередня сесія комітила, не оновивши самері: звірити git log і дописати §0/§1 ДО роботи. Коміти Konst і ботів не рахуються.

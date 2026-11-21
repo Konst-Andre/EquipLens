@@ -8,7 +8,7 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then exit 0; fi
 
 # смоук стенда (tools/smoke_v*.js) — jsdom; поза репо, щоб не тягнути node_modules у публікацію Pages (сайт — корінь main)
 [ -d "$HOME/.deps/node_modules/jsdom" ] || npm install -q --no-save --prefix "$HOME/.deps" jsdom >/dev/null 2>&1 || true
-[ -n "${CLAUDE_ENV_FILE:-}" ] && echo "export NODE_PATH=\"$HOME/.deps/node_modules\"" >> "$CLAUDE_ENV_FILE"
+[ -n "${CLAUDE_ENV_FILE:-}" ] && echo "export NODE_PATH=\"$HOME/.deps/node_modules:/opt/node-tools/node_modules\"" >> "$CLAUDE_ENV_FILE"   # дописати, не замінити: Playwright образу лишається видимим (S40 — require('playwright') падав)
 # Python-Playwright — пара до браузера образу (не зашите число, PW-1; зразок — lens-governance:tools/claude-code/templates/session_start_template.sh):
 #   потрібен детектору «стенд ≡ білд» (lens/BUILD-1_brief.md §5-а Ф3) і селф-тестам приладів ядра (clip · port_same · pw_quiet)
 PWV=$(python3 -c "import json;print(json.load(open('/opt/node-tools/node_modules/playwright/package.json'))['version'])" 2>/dev/null || true)
