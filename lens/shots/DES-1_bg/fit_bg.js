@@ -106,8 +106,18 @@ window.aurLayers = function(dark){
   if (!b || !f) return b;
   const w = a => `rgba(255,255,255,${a.toFixed(3)})`, L = [];
   const hb = dark ? S.bgH3D : S.bgH3L, glow = a => hsl(hb, dark ? 70 : 60, dark ? 62 : 86, a.toFixed(3));   // світло з відтінком аврори варіанта
-  if (f.top) L.push(`radial-gradient(ellipse 95% 70px at 50% ${S.haY}px, ${w(f.top)} 0, ${glow(f.top * .6)} 35%, transparent 70%)`);
-  if (f.bot) L.push(`radial-gradient(ellipse 95% 80px at 50% calc(100% - ${S.haYB}px), ${w(f.bot)} 0, ${glow(f.bot * .6)} 35%, transparent 70%)`);
+  /* світло шапки — під СКЛОМ, не в центрі (Konst 21.11: «по центру надто агресивне… скло в хедері з лівого та правого краю»): дві плями під плиткою знака
+     і капсулою дій; ліва сильніша — ОДНЕ джерело світла угорі зліва, той самий кут, що в канта (`--la` 125°; brand.github.com «product UI»: блиск угорі зліва,
+     загасання вниз праворуч; material.io «light and shadows»), 21.11.2026; центр шапки — тихий */
+  if (f.top){ L.push(`radial-gradient(ellipse 26% 54px at 11% ${S.haY - 6}px, ${w(f.top * .8)} 0, ${glow(f.top * .45)} 40%, transparent 72%)`);
+    L.push(`radial-gradient(ellipse 28% 50px at 85% ${S.haY}px, ${w(f.top * .5)} 0, ${glow(f.top * .3)} 40%, transparent 72%)`); }
+  /* світло низу — так само під СКЛОМ (Konst 21.11: «врахуй острівець з табами, FAB і картки»): пляма під острівцем (він ліворуч від центру) і окрема менша
+     під «+» праворуч; між ними — тихо. Картки світло бере кантом з того ж джерела (угорі зліва) */
+  if (f.bot){ const nv = sbox.querySelector('.el-nav'), fb = sbox.querySelector('.el-fab'), R = sbox.getBoundingClientRect();
+    const cx = e => e ? Math.round(((e.getBoundingClientRect().left + e.getBoundingClientRect().width / 2) - R.left) / R.width * 100) : null;
+    const xn = cx(nv) ?? 38, xf = cx(fb) ?? 84;
+    L.push(`radial-gradient(ellipse 40% 64px at ${xn}% calc(100% - ${S.haYB}px), ${w(f.bot * .75)} 0, ${glow(f.bot * .45)} 40%, transparent 72%)`);
+    L.push(`radial-gradient(ellipse 16% 52px at ${xf}% calc(100% - ${S.haYB}px), ${w(f.bot * .6)} 0, ${glow(f.bot * .35)} 40%, transparent 72%)`); }
   if (f.side) { L.push(`radial-gradient(ellipse 22% 38% at 0% 50%, ${glow(f.side)} 0, transparent 70%)`); L.push(`radial-gradient(ellipse 22% 38% at 100% 55%, ${glow(f.side)} 0, transparent 70%)`); }
   if (f.irid){ const l = dark ? 60 : 72, c = h => `hsla(${h},85%,${l}%,${f.irid.toFixed(3)})`;
     L.push(`conic-gradient(from 210deg at 28% 72%, ${c(160)}, ${c(195)}, ${c(235)}, ${c(275)}, ${c(160)})`); }
